@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Rental Finder</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #f4f6f9;
+    } 
+
+    /* 🔥 Clean cards (not flashy) */
+    .card {
+      border-radius: 12px;
+      transition: 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
+
+    /* 🔥 Theme color (professional) */
+    .btn-primary {
+      background-color: #2563eb;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* 🔥 subtle UI */
+    h2, h3 {
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ NAVBAR -->
+  <%- include("../includes/navbar") %>
+
+  <!-- ✅ MAIN CONTENT -->
+  <div class="container mt-4">
+    <%- body %>
+  </div>
+
+  <!-- ✅ FOOTER -->
+  <%- include("../includes/footer") %>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

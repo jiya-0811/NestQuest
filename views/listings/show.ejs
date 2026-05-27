@@ -1,0 +1,85 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-5">
+
+  <h2 class="fw-bold"><%= listing.title %></h2>
+
+  <p class="text-muted">📍 <%= listing.location %></p>
+
+  <p>💰 ₹ <%= listing.price %></p>
+
+  <p>🎓 <%= listing.distance %> km from <%= listing.college %></p>
+
+  <!-- ⭐ AVG RATING -->
+  <h5>⭐ Average Rating: <%= avgRating || "No ratings yet" %></h5>
+
+  <!-- BADGES -->
+  <div class="mb-3">
+    <% if(listing.price <= 5000){ %>
+      <span class="badge bg-success">Budget</span>
+    <% } %>
+
+    <% if(listing.distance <= 2){ %>
+      <span class="badge bg-primary">Near College</span>
+    <% } %>
+  </div>
+
+  <!-- 🔐 OWNER ONLY -->
+  <% if(currUser && listing.owner && currUser._id.equals(listing.owner)){ %>
+
+    <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
+
+    <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
+      <button class="btn btn-danger">Delete</button>
+    </form>
+
+  <% } %>
+
+  <hr>
+
+  <!-- ⭐ ADD REVIEW -->
+  <h4>Leave a Review</h4>
+
+  <% if(currUser){ %>
+    <form action="/listings/<%= listing._id %>/reviews" method="POST">
+
+      <input type="number" name="review[rating]" min="1" max="5"
+        class="form-control mb-2" placeholder="Rating (1-5)" required>
+
+      <textarea name="review[comment]" class="form-control mb-2"
+        placeholder="Write review..." required></textarea>
+
+      <button class="btn btn-dark">Submit</button>
+    </form>
+
+  <% } else { %>
+    <p>Please login to review</p>
+  <% } %>
+
+  <hr>
+
+  <!-- 📝 REVIEWS -->
+  <h4>All Reviews</h4>
+
+  <% listing.reviews.forEach(review => { %>
+
+    <div class="card p-3 mb-2">
+
+      <b>👤 <%= review.reviewer.username %></b>
+
+      <p>⭐ <%= review.rating %></p>
+      <p><%= review.comment %></p>
+
+      <% if(currUser){ %>
+
+        <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
+          <button class="btn btn-danger btn-sm">Delete Review</button>
+        </form>
+
+      <% } %>
+
+    </div>
+
+  <% }) %>
+
+</div>

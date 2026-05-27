@@ -1,0 +1,141 @@
+<% layout('layouts/boilerplate') %>
+<%- include('../includes/flash') %>
+
+<%
+  const f = filters || {};
+%>
+
+<div class="container mt-5">
+
+  <!-- HEADER -->
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">🤖 Smart Rental Recommendation</h2>
+    <p class="text-muted">Find best stays based on your needs</p>
+  </div>
+
+  <!-- 🔍 SEARCH CARD -->
+  <div class="card shadow-lg border-0 rounded-3 p-4 mb-5">
+    <form method="GET" action="/listings/recommend/search" class="row g-3">
+
+      <!-- BUDGET -->
+      <div class="col-md-3">
+        <label class="form-label">Max Budget (₹)</label>
+        <input type="number" name="budget" class="form-control"
+          placeholder="e.g. 6000"
+          value="<%= f.budget || '' %>">
+      </div>
+
+      <!-- LOCATION -->
+      <div class="col-md-3">
+        <label class="form-label">Location</label>
+        <input type="text" name="location" class="form-control"
+          placeholder="e.g. Indore"
+          value="<%= f.location || '' %>">
+      </div>
+
+      <!-- TYPE -->
+      <div class="col-md-2">
+        <label class="form-label">Type</label>
+        <select name="type" class="form-control">
+          <option value="">Any</option>
+          <option value="shared" <%= f.type === 'shared' ? 'selected' : '' %>>Shared</option>
+          <option value="single" <%= f.type === 'single' ? 'selected' : '' %>>Single</option>
+          <option value="flat" <%= f.type === 'flat' ? 'selected' : '' %>>Flat</option>
+        </select>
+      </div>
+
+      <!-- 🔥 NEW: DISTANCE FILTER -->
+      <div class="col-md-2">
+        <label class="form-label">Max Distance (km)</label>
+        <input type="number" name="distance" class="form-control"
+          placeholder="e.g. 3"
+          value="<%= f.distance || '' %>">
+      </div>
+
+      <!-- 🔥 NEW: COLLEGE FILTER -->
+      <div class="col-md-3">
+        <label class="form-label">College</label>
+        <input type="text" name="college" class="form-control"
+          placeholder="e.g. DAVV"
+          value="<%= f.college || '' %>">
+      </div>
+
+      <!-- BUTTON -->
+      <div class="col-md-12">
+        <button class="btn btn-dark w-100">🔍 Search</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- RESULTS -->
+  <% if(listings && listings.length > 0){ %>
+    <h5 class="mb-4">✨ Recommended Listings</h5>
+  <% } else { %>
+    <div class="text-center mb-4">
+      <h5>No results found 😢</h5>
+      <p class="text-muted">Try adjusting filters</p>
+    </div>
+  <% } %>
+
+  <div class="row">
+
+    <% if(listings && listings.length > 0){ %>
+      <% listings.forEach(listing => { %>
+
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100">
+
+            <img 
+              src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' %>" 
+              class="card-img-top"
+              style="height:200px; object-fit:cover;"
+            >
+
+            <div class="card-body d-flex flex-column">
+
+              <h5 class="fw-bold"><%= listing.title %></h5>
+
+              <p class="text-muted mb-1">📍 <%= listing.location || 'Unknown' %></p>
+              <p class="mb-1">💰 ₹ <%= listing.price || 'N/A' %></p>
+
+              <p class="text-muted mb-2">
+                🎓 <%= listing.distance || '?' %> km from <%= listing.college || 'College' %>
+              </p>
+
+              <!-- BADGES -->
+              <div class="mb-2">
+
+                <% if(listing.price && listing.price <= 5000){ %>
+                  <span class="badge bg-success">Budget</span>
+                <% } %>
+
+                <% if(listing.distance && listing.distance <= 2){ %>
+                  <span class="badge bg-primary">Near College</span>
+                <% } %>
+
+                <% if(listing.type){ %>
+                  <span class="badge bg-info text-dark"><%= listing.type %></span>
+                <% } %>
+
+                <% if(listing.score !== undefined){ %>
+                  <span class="badge bg-dark">⭐ Score: <%= listing.score %></span>
+                <% } %>
+
+              </div>
+
+              <a href="/listings/<%= listing._id %>" class="btn btn-dark btn-sm mt-auto w-100">
+                View Details
+              </a>
+
+            </div>
+
+          </div>
+        </div>
+
+      <% }) %>
+    <% } %>
+
+  </div>
+
+</div>

@@ -1,0 +1,82 @@
+<style>
+  .search-btn{
+    background-color: #ff385c;
+    color:#fff;
+    border-radius: 25px;
+    padding: 6px 12px;
+    transition: 0.2s;
+  }
+
+  .search-btn:hover{
+    background-color: #e03150;
+    color: #fff;
+  }
+
+  .search-btn i{
+    margin-right: 5px;
+  }
+
+  .search-inp{
+    border-radius: 25px;
+    padding: 6px 20px;
+    font-size: 0.9rem;
+  }
+
+  .nav-user {
+    font-weight: 500;
+    margin-right: 10px;
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
+  <div class="container">
+
+    <!-- 🔥 BRAND -->
+    <a class="navbar-brand fw-bold" href="/listings">
+      <i class="fa-solid fa-house"></i> College Rental
+    </a>
+
+    <!-- MOBILE BUTTON -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- LEFT -->
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+        <a class="nav-link" href="/listings/new">➕ Add Listing</a>
+      </div>
+
+      <!-- 🔍 SEARCH -->
+      <div class="ms-auto me-3">
+        <form class="d-flex" action="/listings/recommend/search" method="GET">
+          <input 
+            class="form-control search-inp me-2" 
+            type="search"
+            name="location"
+            placeholder="Search city..."
+          >
+          <button class="btn search-btn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="navbar-nav">
+        <% if(!currUser) { %>
+          <a class="nav-link" href="/signup">Signup</a>
+          <a class="nav-link" href="/login">Login</a>
+        <% } else { %>
+          <span class="nav-user">👋 <%= currUser.username %></span>
+          <form action="/logout" method="POST" class="d-inline">
+            <button class="btn btn-outline-danger btn-sm">Logout</button>
+          </form>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</nav>
