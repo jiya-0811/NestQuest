@@ -1,150 +1,281 @@
 const Listing = require("../models/listing");
-//const Review = require("../models/review"); // 🔥 ADD THIS
+const wrapAsync = require("../utils/wrapAsync");
+const ExpressError = require("../utils/ExpressError");
 
-// 🔥 SHOW ALL
-module.exports.index = async (req, res) => {
+
+// ==========================================
+// SHOW ALL LISTINGS
+// ==========================================
+
+module.exports.index = wrapAsync(async (req, res) => {
   const allListings = await Listing.find({});
+
   res.render("listings/index", { allListings });
-};
+});
 
-// 🔥 NEW FORM
+
+// ==========================================
+// NEW LISTING FORM
+// ==========================================
+
 module.exports.renderNewForm = (req, res) => {
-  res.render("listings/new", { listing: {}, errorMessages: [] });
+  res.render("listings/new", {
+    listing: {},
+    errorMessages: []
+  });
 };
 
-// 🔥 EDIT FORM
-module.exports.renderEditForm = async (req, res) => {
+
+// ==========================================
+// EDIT LISTING FORM
+// ==========================================
+
+module.exports.renderEditForm = wrapAsync(async (req, res) => {
+
   const listing = await Listing.findById(req.params.id);
-  if (!listing) return res.send("Listing not found");
+
+  if (!listing) {
+    throw new ExpressError("Listing not found", 404);
+  }
 
   res.render("listings/edit", { listing });
-};
+});
 
-// 🔥 CREATE
-module.exports.createListing = async (req, res) => {
-  try {
-    const newListing = new Listing(req.body.listing);
 
-    // 🔥 USER ADD
-    newListing.owner = req.user._id;
+// ==========================================
+// CREATE LISTING
+// ==========================================
 
-    if (!newListing.amenities) {
-      newListing.amenities = [];
-    }
+module.exports.createListing = wrapAsync(async (req, res) => {
 
-    await newListing.save();
+  const newListing = new Listing(req.body.listing);
 
-    req.flash("success", "Listing Created!");
-    res.redirect("/listings");
+  // Add logged-in user as owner
+  newListing.owner = req.user._id;
 
-  } catch (err) {
-    res.render("listings/new", {
-      listing: req.body.listing,
-      errorMessages: Object.values(err.errors).map(e => e.message)
-    });
+  // Default amenities
+  if (!newListing.amenities) {
+    newListing.amenities = [];
   }
-};
 
-// 🔥 SHOW ONE
+  await newListing.save();
+
+  req.flash("success", "Listing Created!");
+
+  res.redirect("/listings");
+});
 
 
-module.exports.showListing = async (req, res) => {
+// ==========================================
+// SHOW ONE LISTING
+// ==========================================
+
+module.exports.showListing = wrapAsync(async (req, res) => {
+
   const listing = await Listing.findById(req.params.id)
-    .populate({ path: 'reviews', populate: { path: 'reviewer' } });
+    .populate({
+      path: "reviews",
+      populate: {
+        path: "reviewer"
+      }
+    });
+
+  if (!listing) {
+    throw new ExpressError("Listing not found", 404);
+  }
 
   // ⭐ Average Rating
   let avgRating = 0;
 
   if (listing.reviews.length > 0) {
+
     let sum = 0;
-    listing.reviews.forEach(r => sum += r.rating);
+
+    listing.reviews.forEach((r) => {
+      sum += r.rating;
+    });
+
     avgRating = (sum / listing.reviews.length).toFixed(1);
   }
 
-  res.render("listings/show", { listing, avgRating });
-};
-// 🔥 UPDATE
-module.exports.updateListing = async (req, res) => {
-  try {
-    const updatedData = req.body.listing;
+  res.render("listings/show", {
+    listing,
+    avgRating
+  });
+});
 
-    if (!updatedData.amenities) {
-      updatedData.amenities = [];
+
+// ==========================================
+// UPDATE LISTING
+// ==========================================
+
+module.exports.updateListing = wrapAsync(async (req, res) => {
+
+  const updatedData = req.body.listing;
+
+  if (!updatedData.amenities) {
+    updatedData.amenities = [];
+  }
+
+  const updatedListing = await Listing.findByIdAndUpdate(
+    req.params.id,
+    updatedData,
+    {
+      runValidators: true,
+      new: true
+    }
+  );
+
+  if (!updatedListing) {
+    throw new ExpressError("Listing not found", 404);
+  }
+
+  req.flash("success", "Listing Updated!");
+
+  res.redirect(`/listings/${req.params.id}`);
+});
+
+
+// ==========================================
+// DELETE LISTING
+// ==========================================
+
+module.exports.destroyListing = wrapAsync(async (req, res) => {
+
+  const deletedListing = await Listing.findByIdAndDelete(req.params.id);
+
+  if (!deletedListing) {
+    throw new ExpressError("Listing not found", 404);
+  }
+
+  req.flash("success", "Listing Deleted!");
+
+  res.redirect("/listings");
+});
+
+
+// ==========================================
+// SMART RECOMMENDATION
+// ==========================================
+
+module.exports.recommendListings = wrapAsync(async (req, res) => {
+
+  const {
+    budget,
+    location,
+    type,
+    college,
+    distance
+  } = req.query;
+
+  let query = {};
+
+  // ========================================
+  // FILTERS
+  // ========================================
+
+  if (budget) {
+    query.price = {
+      $lte: Number(budget)
+    };
+  }
+
+  if (location) {
+    query.location = new RegExp(location, "i");
+  }
+
+  if (type) {
+    query.type = type;
+  }
+
+  if (college) {
+    query.college = new RegExp(college, "i");
+  }
+
+  if (distance) {
+    query.distance = {
+      $lte: Number(distance)
+    };
+  }
+
+
+  // ========================================
+  // FIND LISTINGS
+  // ========================================
+
+  const listings = await Listing.find(query);
+
+
+  // ========================================
+  // SMART SCORING
+  // ========================================
+
+  const scoredListings = listings.map((l) => {
+
+    let score = 0;
+
+    if (budget && l.price <= Number(budget)) {
+      score += 2;
     }
 
-    await Listing.findByIdAndUpdate(req.params.id, updatedData, {
-      runValidators: true
-    });
+    if (
+      location &&
+      l.location?.toLowerCase().includes(location.toLowerCase())
+    ) {
+      score += 2;
+    }
 
-    req.flash("success", "Listing Updated!");
-    res.redirect(`/listings/${req.params.id}`);
+    if (type && l.type === type) {
+      score += 2;
+    }
 
-  } catch (err) {
-    const listing = await Listing.findById(req.params.id);
+    if (
+      college &&
+      l.college?.toLowerCase().includes(college.toLowerCase())
+    ) {
+      score += 2;
+    }
 
-    res.render("listings/edit", {
-      listing,
-      errorMessages: Object.values(err.errors).map(e => e.message)
-    });
-  }
-};
+    if (distance && l.distance <= Number(distance)) {
+      score += 2;
+    }
 
-// 🔥 DELETE
-module.exports.destroyListing = async (req, res) => {
-  await Listing.findByIdAndDelete(req.params.id);
-  req.flash("success", "Listing Deleted!");
-  res.redirect("/listings");
-};
+    // Near college bonus
+    if (l.distance && l.distance <= 2) {
+      score += 1;
+    }
 
-// 🔥 AI RECOMMEND (same)
-module.exports.recommendListings = async (req, res) => {
-  try {
-    const { budget, location, type, college, distance } = req.query;
+    // WiFi bonus
+    if (l.amenities?.includes("wifi")) {
+      score += 1;
+    }
 
-    let query = {};
+    return {
+      ...l._doc,
+      score
+    };
+  });
 
-    // 🔥 FILTERS
-    if (budget) query.price = { $lte: Number(budget) };
-    if (location) query.location = new RegExp(location, "i");
-    if (type) query.type = type;
-    if (college) query.college = new RegExp(college, "i");
-    if (distance) query.distance = { $lte: Number(distance) };
 
-    const listings = await Listing.find(query);
+  // ========================================
+  // SORT BEST FIRST
+  // ========================================
 
-    // 🔥 SMART SCORING
-    const scoredListings = listings.map(l => {
-      let score = 0;
+  scoredListings.sort((a, b) => b.score - a.score);
 
-      if (budget && l.price <= Number(budget)) score += 2;
 
-      if (location && l.location?.toLowerCase().includes(location.toLowerCase()))
-        score += 2;
+  // ========================================
+  // RENDER
+  // ========================================
 
-      if (type && l.type === type) score += 2;
-
-      if (college && l.college?.toLowerCase().includes(college.toLowerCase()))
-        score += 2;
-
-      if (distance && l.distance <= Number(distance)) score += 2;
-
-      if (l.distance && l.distance <= 2) score += 1;
-
-      if (l.amenities?.includes("wifi")) score += 1;
-
-      return { ...l._doc, score };
-    });
-
-    // 🔥 SORT BEST FIRST
-    scoredListings.sort((a, b) => b.score - a.score);
-
-    res.render("listings/recommend", {
-      listings: scoredListings,
-      filters: { budget, location, type, college, distance }
-    });
-
-  } catch (err) {
-    console.log("RECOMMEND ERROR:", err);
-    res.send("Error loading recommendations");
-  }
-};
+  res.render("listings/recommend", {
+    listings: scoredListings,
+    filters: {
+      budget,
+      location,
+      type,
+      college,
+      distance
+    }
+  });
+});

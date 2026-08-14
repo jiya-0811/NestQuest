@@ -133,7 +133,18 @@ app.use((req, res) => {
   res.status(404).send("Page Not Found");
 });
 
+// ==========================================
+// CENTRAL ERROR HANDLER
+// ==========================================
 
+app.use((err, req, res, next) => {
+  const {
+    statusCode = 500,
+    message = "Something went wrong!"
+  } = err;
+
+  res.status(statusCode).send(message);
+});
 // ==========================================
 // SERVER
 // ==========================================
