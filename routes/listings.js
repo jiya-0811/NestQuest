@@ -1,32 +1,99 @@
 const express = require("express");
 const router = express.Router();
+
 const listings = require("../controllers/listings");
-    console.log("LISTING ROUTES LOADED");
-// ALL
+
+const {
+  isLoggedIn,
+  validateListing
+} = require("../middleware");
+
+console.log("LISTING ROUTES LOADED");
+
+
+// ===============================
+// ALL LISTINGS
+// ===============================
+
 router.get("/", listings.index);
 
-// NEW
-router.get("/new", listings.renderNewForm);
-//EDIT
-//router.get("/:id/edit", listings.renderEditForm);
-router.get("/:id/edit", 
- // console.log("EDIT ROUTE HIT"); // 👈 DEBUG
-  //res.send("Edit page working");
-  listings.renderEditForm);
 
-// CREATE
-router.post("/", listings.createListing);
+// ===============================
+// NEW LISTING FORM
+// ===============================
 
-// 🔥 IMPORTANT: recommend पहले
-router.get("/recommend/search", listings.recommendListings);
+router.get(
+  "/new",
+  isLoggedIn,
+  listings.renderNewForm
+);
 
-// SHOW (LAST में होना चाहिए)
-router.get("/:id", listings.showListing);
 
-//edit
-router.put("/:id", listings.updateListing);
+// ===============================
+// CREATE LISTING
+// ===============================
 
-// DELETE
-router.delete("/:id", listings.destroyListing);
+router.post(
+  "/",
+  isLoggedIn,
+  validateListing,
+  listings.createListing
+);
+
+
+// ===============================
+// AI RECOMMENDATION
+// IMPORTANT: BEFORE /:id
+// ===============================
+
+router.get(
+  "/recommend/search",
+  listings.recommendListings
+);
+
+
+// ===============================
+// EDIT FORM
+// ===============================
+
+router.get(
+  "/:id/edit",
+  isLoggedIn,
+  listings.renderEditForm
+);
+
+
+// ===============================
+// SHOW LISTING
+// ===============================
+
+router.get(
+  "/:id",
+  listings.showListing
+);
+
+
+// ===============================
+// UPDATE LISTING
+// ===============================
+
+router.put(
+  "/:id",
+  isLoggedIn,
+  validateListing,
+  listings.updateListing
+);
+
+
+// ===============================
+// DELETE LISTING
+// ===============================
+
+router.delete(
+  "/:id",
+  isLoggedIn,
+  listings.destroyListing
+);
+
 
 module.exports = router;

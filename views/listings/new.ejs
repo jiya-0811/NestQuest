@@ -1,56 +1,108 @@
 <% layout('layouts/boilerplate') %>
-<%- include('../includes/flash') %>
+<!-- <%- include('../includes/flash') %> -->
 
 <div class="row justify-content-center mt-5">
   <div class="col-md-6">
 
     <div class="card shadow-lg border-0 rounded-3 p-4">
 
-      <h3 class="mb-3 text-center fw-bold">➕ Add New Rental</h3>
-      <p class="text-muted text-center">Help students find better stays</p>
+      <h3 class="mb-3 text-center fw-bold">
+        ➕ Add New Rental
+      </h3>
+
+      <p class="text-muted text-center">
+        Help students find better stays
+      </p>
 
       <form action="/listings" method="POST">
 
         <!-- TITLE -->
         <div class="mb-3">
           <label class="form-label">Title</label>
-          <input type="text" name="listing[title]" class="form-control" required>
+          <input
+            type="text"
+            name="listing[title]"
+            class="form-control"
+            placeholder="e.g. Affordable Student PG"
+            required
+          >
         </div>
+
 
         <!-- DESCRIPTION -->
         <div class="mb-3">
           <label class="form-label">Description</label>
-          <textarea name="listing[description]" class="form-control" rows="3" required></textarea>
+          <textarea
+            name="listing[description]"
+            class="form-control"
+            rows="3"
+            placeholder="Describe the rental..."
+            required
+          ></textarea>
         </div>
+
 
         <!-- PRICE -->
         <div class="mb-3">
           <label class="form-label">Price (₹)</label>
-          <input type="number" name="listing[price]" class="form-control" required>
+          <input
+            type="number"
+            name="listing[price]"
+            class="form-control"
+            placeholder="e.g. 5000"
+            required
+          >
         </div>
+
 
         <!-- CITY -->
         <div class="mb-3">
           <label class="form-label">City</label>
-          <input type="text" name="listing[location]" class="form-control" placeholder="e.g. Indore" required>
+          <input
+            type="text"
+            name="listing[location]"
+            class="form-control"
+            placeholder="e.g. Indore"
+            required
+          >
         </div>
+
 
         <!-- COUNTRY -->
         <div class="mb-3">
           <label class="form-label">Country</label>
-          <input type="text" name="listing[country]" class="form-control" value="India" required>
+          <input
+            type="text"
+            name="listing[country]"
+            class="form-control"
+            value="India"
+            required
+          >
         </div>
+
 
         <!-- COLLEGE -->
         <div class="mb-3">
           <label class="form-label">Nearby College</label>
-          <input type="text" name="listing[college]" class="form-control" placeholder="e.g. DAVV College" required>
+          <input
+            type="text"
+            name="listing[college]"
+            class="form-control"
+            placeholder="e.g. DAVV College"
+            required
+          >
         </div>
+
 
         <!-- TYPE -->
         <div class="mb-3">
           <label class="form-label">Type</label>
-          <select name="listing[type]" class="form-control" required>
+
+          <select
+            name="listing[type]"
+            class="form-control"
+            required
+          >
             <option value="">Select</option>
             <option value="shared">Shared Room</option>
             <option value="single">Single Room</option>
@@ -58,29 +110,121 @@
           </select>
         </div>
 
+
         <!-- DISTANCE -->
         <div class="mb-3">
-          <label class="form-label">Distance from College (km)</label>
-          <input type="number" name="listing[distance]" class="form-control" required>
+          <label class="form-label">
+            Distance from College (km)
+          </label>
+
+          <input
+            type="number"
+            name="listing[distance]"
+            class="form-control"
+            placeholder="e.g. 2"
+            required
+          >
         </div>
 
+
         <!-- AMENITIES -->
-        <div class="mb-3">
-          <label class="form-label">Amenities</label>
+        <div class="mb-4">
 
+          <label class="form-label">
+            Amenities
+          </label>
+
+          <!-- WIFI -->
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="listing[amenities][]" value="wifi">
-            <label class="form-check-label">WiFi</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="listing[amenities][]"
+              value="wifi"
+              id="wifi"
+            >
+
+            <label
+              class="form-check-label"
+              for="wifi"
+            >
+              WiFi
+            </label>
           </div>
 
+
+          <!-- FOOD -->
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="listing[amenities][]" value="food">
-            <label class="form-check-label">Food</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="listing[amenities][]"
+              value="food"
+              id="food"
+            >
+
+            <label
+              class="form-check-label"
+              for="food"
+            >
+              Food
+            </label>
           </div>
 
+
+          <!-- PARKING -->
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="listing[amenities][]" value="parking">
-            <label class="form-check-label">Parking</label>
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="listing[amenities][]"
+              value="parking"
+              id="parking"
+            >
+
+            <label
+              class="form-check-label"
+              for="parking"
+            >
+              Parking
+            </label>
           </div>
 
-          <div class="form-check
+
+          <!-- LAUNDRY -->
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="listing[amenities][]"
+              value="laundry"
+              id="laundry"
+            >
+
+            <label
+              class="form-check-label"
+              for="laundry"
+            >
+              Laundry
+            </label>
+          </div>
+
+        </div>
+
+
+        <!-- SUBMIT BUTTON -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-primary btn-lg"
+          >
+            Add Listing 🚀
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</div>

@@ -1,17 +1,34 @@
-<% if (locals.success && locals.success.length) { %>
-  <% locals.success.forEach(msg => { %>
-    <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+<% if (success && success.length > 0) { %>
+
+  <% success.forEach(msg => { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
       <%= msg %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close">
+      </button>
     </div>
   <% }) %>
+
 <% } %>
 
-<% if (locals.error && locals.error.length) { %>
-  <% locals.error.forEach(msg => { %>
-    <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+
+<% if (error && error.length > 0) { %>
+
+  <% error.forEach(msg => { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <%= msg %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close">
+      </button>
     </div>
   <% }) %>
+
 <% } %>
