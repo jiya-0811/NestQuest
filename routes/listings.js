@@ -77,6 +77,7 @@ router.get(
 router.put(
   "/:id",
   isLoggedIn,
+  upload.single("image"),
   validateListing,
   listings.updateListing
 );

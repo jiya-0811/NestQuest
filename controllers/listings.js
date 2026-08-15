@@ -128,27 +128,41 @@ module.exports.showListing = wrapAsync(async (req, res) => {
 // ==========================================
 // UPDATE LISTING
 // ==========================================
+// ==========================================
+// UPDATE LISTING
+// ==========================================
 
 module.exports.updateListing = wrapAsync(async (req, res) => {
 
   const updatedData = req.body.listing;
 
+  // Default amenities
   if (!updatedData.amenities) {
     updatedData.amenities = [];
   }
 
-  const updatedListing = await Listing.findByIdAndUpdate(
-    req.params.id,
-    updatedData,
-    {
-      runValidators: true,
-      new: true
-    }
-  );
+  // Find listing
+  const listing = await Listing.findById(req.params.id);
 
-  if (!updatedListing) {
+  if (!listing) {
     throw new ExpressError("Listing not found", 404);
   }
+
+  // Update text/form data
+  Object.assign(listing, updatedData);
+
+  // ==========================================
+  // UPDATE IMAGE IF NEW IMAGE IS PROVIDED
+  // ==========================================
+
+  if (req.file) {
+    listing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  }
+
+  await listing.save();
 
   req.flash("success", "Listing Updated!");
 
