@@ -2,7 +2,6 @@ const Listing = require("../models/listing");
 const wrapAsync = require("../utils/wrapAsync");
 const ExpressError = require("../utils/ExpressError");
 
-
 // ==========================================
 // SHOW ALL LISTINGS
 // ==========================================
@@ -48,6 +47,10 @@ module.exports.renderEditForm = wrapAsync(async (req, res) => {
 
 module.exports.createListing = wrapAsync(async (req, res) => {
 
+  console.log("🔥 CREATE LISTING HIT");
+  console.log("📦 REQUEST BODY:", req.body);
+  console.log("🖼️ UPLOADED FILE:", req.file);
+
   const newListing = new Listing(req.body.listing);
 
   // Add logged-in user as owner
@@ -58,7 +61,24 @@ module.exports.createListing = wrapAsync(async (req, res) => {
     newListing.amenities = [];
   }
 
+  // ==========================================
+  // CLOUDINARY IMAGE
+  // ==========================================
+
+  if (req.file) {
+    console.log("☁️ CLOUDINARY FILE RECEIVED");
+
+    newListing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  } else {
+    console.log("⚠️ NO IMAGE RECEIVED");
+  }
+
   await newListing.save();
+
+  console.log("✅ LISTING SAVED SUCCESSFULLY");
 
   req.flash("success", "Listing Created!");
 

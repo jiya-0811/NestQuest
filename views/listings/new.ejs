@@ -1,5 +1,4 @@
 <% layout('layouts/boilerplate') %>
-<!-- <%- include('../includes/flash') %> -->
 
 <div class="row justify-content-center mt-5">
   <div class="col-md-6">
@@ -14,7 +13,14 @@
         Help students find better stays
       </p>
 
-      <form action="/listings" method="POST">
+      <!-- IMPORTANT:
+           enctype is required for file/image upload
+      -->
+      <form
+        action="/listings"
+        method="POST"
+        enctype="multipart/form-data"
+      >
 
         <!-- TITLE -->
         <div class="mb-3">
@@ -50,6 +56,7 @@
             name="listing[price]"
             class="form-control"
             placeholder="e.g. 5000"
+            min="1"
             required
           >
         </div>
@@ -122,8 +129,28 @@
             name="listing[distance]"
             class="form-control"
             placeholder="e.g. 2"
+            min="0"
             required
           >
+        </div>
+
+
+        <!-- IMAGE UPLOAD -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">
+            Rental Image
+          </label>
+
+          <input
+            type="file"
+            name="image"
+            class="form-control"
+            accept="image/png, image/jpeg, image/jpg, image/webp"
+          >
+
+          <div class="form-text">
+            Upload JPG, PNG or WEBP image.
+          </div>
         </div>
 
 

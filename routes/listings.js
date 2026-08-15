@@ -8,15 +8,16 @@ const {
   validateListing
 } = require("../middleware");
 
-console.log("LISTING ROUTES LOADED");
+// 🔥 MULTER
+const upload = require("../utils/multer");
 
+console.log("LISTING ROUTES LOADED");
 
 // ===============================
 // ALL LISTINGS
 // ===============================
 
 router.get("/", listings.index);
-
 
 // ===============================
 // NEW LISTING FORM
@@ -28,7 +29,6 @@ router.get(
   listings.renderNewForm
 );
 
-
 // ===============================
 // CREATE LISTING
 // ===============================
@@ -36,10 +36,10 @@ router.get(
 router.post(
   "/",
   isLoggedIn,
+  upload.single("image"),
   validateListing,
   listings.createListing
 );
-
 
 // ===============================
 // AI RECOMMENDATION
@@ -51,7 +51,6 @@ router.get(
   listings.recommendListings
 );
 
-
 // ===============================
 // EDIT FORM
 // ===============================
@@ -62,7 +61,6 @@ router.get(
   listings.renderEditForm
 );
 
-
 // ===============================
 // SHOW LISTING
 // ===============================
@@ -71,7 +69,6 @@ router.get(
   "/:id",
   listings.showListing
 );
-
 
 // ===============================
 // UPDATE LISTING
@@ -84,7 +81,6 @@ router.put(
   listings.updateListing
 );
 
-
 // ===============================
 // DELETE LISTING
 // ===============================
@@ -94,6 +90,5 @@ router.delete(
   isLoggedIn,
   listings.destroyListing
 );
-
 
 module.exports = router;

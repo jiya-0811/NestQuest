@@ -129,26 +129,24 @@ app.get("/", (req, res) => {
 // 404
 // ==========================================
 
+// 404
 app.use((req, res) => {
   res.status(404).send("Page Not Found");
 });
 
-// ==========================================
-// CENTRAL ERROR HANDLER
-// ==========================================
 
+// ERROR HANDLER
 app.use((err, req, res, next) => {
-  const {
-    statusCode = 500,
-    message = "Something went wrong!"
-  } = err;
+  console.log("🔥 ACTUAL ERROR:", err);
+  console.log("🔥 ERROR MESSAGE:", err.message);
 
-  res.status(statusCode).send(message);
+  res.status(err.statusCode || 500).send(
+    `Something went wrong: ${err.message}`
+  );
 });
-// ==========================================
-// SERVER
-// ==========================================
 
+
+// SERVER
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
