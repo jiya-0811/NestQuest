@@ -66,14 +66,18 @@ module.exports.createListing = wrapAsync(async (req, res) => {
   // ==========================================
 
   if (req.file) {
+
     console.log("☁️ CLOUDINARY FILE RECEIVED");
 
     newListing.image = {
       url: req.file.path,
       filename: req.file.filename
     };
+
   } else {
+
     console.log("⚠️ NO IMAGE RECEIVED");
+
   }
 
   await newListing.save();
@@ -128,9 +132,6 @@ module.exports.showListing = wrapAsync(async (req, res) => {
 // ==========================================
 // UPDATE LISTING
 // ==========================================
-// ==========================================
-// UPDATE LISTING
-// ==========================================
 
 module.exports.updateListing = wrapAsync(async (req, res) => {
 
@@ -156,10 +157,12 @@ module.exports.updateListing = wrapAsync(async (req, res) => {
   // ==========================================
 
   if (req.file) {
+
     listing.image = {
       url: req.file.path,
       filename: req.file.filename
     };
+
   }
 
   await listing.save();
@@ -199,37 +202,85 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
     location,
     type,
     college,
-    distance
+    distance,
+    amenities
   } = req.query;
+
+
+  // ========================================
+  // NORMALIZE AMENITIES
+  // ========================================
+
+  let selectedAmenities = [];
+
+  if (amenities) {
+
+    if (Array.isArray(amenities)) {
+
+      selectedAmenities = amenities;
+
+    } else {
+
+      selectedAmenities = [amenities];
+
+    }
+
+  }
+
+
+  // ========================================
+  // BUILD DATABASE FILTER
+  // ========================================
 
   let query = {};
 
-  // ========================================
-  // FILTERS
-  // ========================================
+
+  // Budget filter
 
   if (budget) {
+
     query.price = {
       $lte: Number(budget)
     };
+
   }
+
+
+  // Location filter
 
   if (location) {
+
     query.location = new RegExp(location, "i");
+
   }
+
+
+  // Type filter
 
   if (type) {
+
     query.type = type;
+
   }
+
+
+  // College filter
 
   if (college) {
+
     query.college = new RegExp(college, "i");
+
   }
 
+
+  // Distance filter
+
   if (distance) {
+
     query.distance = {
       $lte: Number(distance)
     };
+
   }
 
 
@@ -248,68 +299,150 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
 
     let score = 0;
 
+    const listingAmenities = l.amenities || [];
+
+
+    // ======================================
+    // BUDGET SCORE
+    // ======================================
+
     if (budget && l.price <= Number(budget)) {
+
       score += 2;
+
     }
+
+
+    // ======================================
+    // LOCATION SCORE
+    // ======================================
 
     if (
       location &&
       l.location?.toLowerCase().includes(location.toLowerCase())
     ) {
+
       score += 2;
+
     }
 
+
+    // ======================================
+    // TYPE SCORE
+    // ======================================
+
     if (type && l.type === type) {
+
       score += 2;
+
     }
+
+
+    // ======================================
+    // COLLEGE SCORE
+    // ======================================
 
     if (
       college &&
       l.college?.toLowerCase().includes(college.toLowerCase())
     ) {
+
       score += 2;
+
     }
 
-    if (distance && l.distance <= Number(distance)) {
+
+    // ======================================
+    // DISTANCE SCORE
+    // ======================================
+
+    if (
+      distance &&
+      l.distance <= Number(distance)
+    ) {
+
       score += 2;
+
     }
 
-    // Near college bonus
-    if (l.distance && l.distance <= 2) {
+
+    // ======================================
+    // AMENITIES SCORE
+    // ======================================
+
+    let matchedAmenities = [];
+
+    selectedAmenities.forEach((amenity) => {
+
+      if (listingAmenities.includes(amenity)) {
+
+        score += 2;
+
+        matchedAmenities.push(amenity);
+
+      }
+
+    });
+
+
+    // ======================================
+    // NEAR COLLEGE BONUS
+    // ======================================
+
+    if (l.distance !== undefined && l.distance <= 2) {
+
       score += 1;
+
     }
 
-    // WiFi bonus
-    if (l.amenities?.includes("wifi")) {
-      score += 1;
-    }
+
+    // ======================================
+    // RETURN LISTING
+    // ======================================
 
     return {
+
       ...l._doc,
-      score
+
+      score,
+
+      matchedAmenities
+
     };
+
   });
 
 
   // ========================================
-  // SORT BEST FIRST
+  // SORT BEST MATCH FIRST
   // ========================================
 
-  scoredListings.sort((a, b) => b.score - a.score);
+  scoredListings.sort((a, b) => {
+
+    return b.score - a.score;
+
+  });
 
 
   // ========================================
-  // RENDER
+  // RENDER RESULTS
   // ========================================
 
   res.render("listings/recommend", {
+
     listings: scoredListings,
+
     filters: {
+
       budget,
       location,
       type,
       college,
-      distance
+      distance,
+      amenities: selectedAmenities
+
     }
+
   });
+
 });
