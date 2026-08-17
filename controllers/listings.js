@@ -6,10 +6,106 @@ const ExpressError = require("../utils/ExpressError");
 // SHOW ALL LISTINGS
 // ==========================================
 
-module.exports.index = wrapAsync(async (req, res) => {
-  const allListings = await Listing.find({});
+// ==========================================
+// SHOW ALL LISTINGS + BASIC SEARCH
+// ==========================================
 
-  res.render("listings/index", { allListings });
+module.exports.index = wrapAsync(async (req, res) => {
+
+  const {
+    search,
+    budget,
+    type,
+    sort
+  } = req.query;
+
+  let query = {};
+
+  // ==========================================
+  // SEARCH BY TITLE / LOCATION / COLLEGE
+  // ==========================================
+
+  if (search) {
+
+    query.$or = [
+      { title: new RegExp(search, "i") },
+      { location: new RegExp(search, "i") },
+      { college: new RegExp(search, "i") }
+    ];
+
+  }
+
+  // ==========================================
+  // MAX BUDGET
+  // ==========================================
+
+  if (budget) {
+
+    query.price = {
+      $lte: Number(budget)
+    };
+
+  }
+
+  // ==========================================
+  // TYPE
+  // ==========================================
+
+  if (type) {
+
+    query.type = type;
+
+  }
+
+  // ==========================================
+  // SORT
+  // ==========================================
+
+  let sortOption = {};
+
+  if (sort === "priceLow") {
+
+    sortOption.price = 1;
+
+  } else if (sort === "priceHigh") {
+
+    sortOption.price = -1;
+
+  } else if (sort === "distance") {
+
+    sortOption.distance = 1;
+
+  } else {
+
+    sortOption._id = -1;
+
+  }
+
+  // ==========================================
+  // FIND LISTINGS
+  // ==========================================
+
+  const allListings = await Listing
+    .find(query)
+    .sort(sortOption);
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+
+  res.render("listings/index", {
+
+    allListings,
+
+    filters: {
+      search: search || "",
+      budget: budget || "",
+      type: type || "",
+      sort: sort || ""
+    }
+
+  });
+
 });
 
 
@@ -195,6 +291,10 @@ module.exports.destroyListing = wrapAsync(async (req, res) => {
 // SMART RECOMMENDATION
 // ==========================================
 
+// ==========================================
+// SMART RECOMMENDATION
+// ==========================================
+
 module.exports.recommendListings = wrapAsync(async (req, res) => {
 
   const {
@@ -207,9 +307,9 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   } = req.query;
 
 
-  // ========================================
+  // ==========================================
   // NORMALIZE AMENITIES
-  // ========================================
+  // ==========================================
 
   let selectedAmenities = [];
 
@@ -228,9 +328,9 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   }
 
 
-  // ========================================
+  // ==========================================
   // BUILD DATABASE FILTER
-  // ========================================
+  // ==========================================
 
   let query = {};
 
@@ -284,16 +384,48 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   }
 
 
-  // ========================================
+  // ==========================================
   // FIND LISTINGS
-  // ========================================
+  // ==========================================
 
   const listings = await Listing.find(query);
 
 
-  // ========================================
+  // ==========================================
+  // MAX POSSIBLE SCORE
+  // ==========================================
+
+  let maxScore = 0;
+
+  if (budget) maxScore += 2;
+
+  if (location) maxScore += 2;
+
+  if (type) maxScore += 2;
+
+  if (college) maxScore += 2;
+
+  if (distance) maxScore += 2;
+
+  // Each selected amenity can give +2
+
+  maxScore += selectedAmenities.length * 2;
+
+  // Near college bonus
+
+  maxScore += 1;
+
+
+  // Prevent division by zero
+
+  if (maxScore === 0) {
+    maxScore = 1;
+  }
+
+
+  // ==========================================
   // SMART SCORING
-  // ========================================
+  // ==========================================
 
   const scoredListings = listings.map((l) => {
 
@@ -301,60 +433,90 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
 
     const listingAmenities = l.amenities || [];
 
+    let matchedPreferences = [];
 
-    // ======================================
-    // BUDGET SCORE
-    // ======================================
+    let matchedAmenities = [];
 
-    if (budget && l.price <= Number(budget)) {
+
+    // ==========================================
+    // BUDGET MATCH
+    // ==========================================
+
+    if (
+      budget &&
+      l.price <= Number(budget)
+    ) {
 
       score += 2;
+
+      matchedPreferences.push(
+        `Within your ₹${budget} budget`
+      );
 
     }
 
 
-    // ======================================
-    // LOCATION SCORE
-    // ======================================
+    // ==========================================
+    // LOCATION MATCH
+    // ==========================================
 
     if (
       location &&
-      l.location?.toLowerCase().includes(location.toLowerCase())
+      l.location?.toLowerCase().includes(
+        location.toLowerCase()
+      )
     ) {
 
       score += 2;
 
+      matchedPreferences.push(
+        "Preferred location"
+      );
+
     }
 
 
-    // ======================================
-    // TYPE SCORE
-    // ======================================
+    // ==========================================
+    // TYPE MATCH
+    // ==========================================
 
-    if (type && l.type === type) {
+    if (
+      type &&
+      l.type === type
+    ) {
 
       score += 2;
 
+      matchedPreferences.push(
+        "Preferred room type"
+      );
+
     }
 
 
-    // ======================================
-    // COLLEGE SCORE
-    // ======================================
+    // ==========================================
+    // COLLEGE MATCH
+    // ==========================================
 
     if (
       college &&
-      l.college?.toLowerCase().includes(college.toLowerCase())
+      l.college?.toLowerCase().includes(
+        college.toLowerCase()
+      )
     ) {
 
       score += 2;
 
+      matchedPreferences.push(
+        "Preferred college"
+      );
+
     }
 
 
-    // ======================================
-    // DISTANCE SCORE
-    // ======================================
+    // ==========================================
+    // DISTANCE MATCH
+    // ==========================================
 
     if (
       distance &&
@@ -363,18 +525,22 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
 
       score += 2;
 
+      matchedPreferences.push(
+        `Within ${distance} km`
+      );
+
     }
 
 
-    // ======================================
-    // AMENITIES SCORE
-    // ======================================
-
-    let matchedAmenities = [];
+    // ==========================================
+    // AMENITIES MATCH
+    // ==========================================
 
     selectedAmenities.forEach((amenity) => {
 
-      if (listingAmenities.includes(amenity)) {
+      if (
+        listingAmenities.includes(amenity)
+      ) {
 
         score += 2;
 
@@ -385,26 +551,47 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
     });
 
 
-    // ======================================
+    // ==========================================
     // NEAR COLLEGE BONUS
-    // ======================================
+    // ==========================================
 
-    if (l.distance !== undefined && l.distance <= 2) {
+    if (
+      l.distance !== undefined &&
+      l.distance <= 2
+    ) {
 
       score += 1;
+
+      matchedPreferences.push(
+        "Very close to college"
+      );
 
     }
 
 
-    // ======================================
+    // ==========================================
+    // MATCH PERCENTAGE
+    // ==========================================
+
+    const matchPercentage = Math.min(
+      100,
+      Math.round((score / maxScore) * 100)
+    );
+
+
+    // ==========================================
     // RETURN LISTING
-    // ======================================
+    // ==========================================
 
     return {
 
       ...l._doc,
 
       score,
+
+      matchPercentage,
+
+      matchedPreferences,
 
       matchedAmenities
 
@@ -413,20 +600,40 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   });
 
 
-  // ========================================
+  // ==========================================
   // SORT BEST MATCH FIRST
-  // ========================================
+  // ==========================================
 
   scoredListings.sort((a, b) => {
 
-    return b.score - a.score;
+    if (b.score !== a.score) {
+
+      return b.score - a.score;
+
+    }
+
+    // If score is same,
+    // prefer cheaper listing
+
+    return a.price - b.price;
 
   });
 
 
-  // ========================================
+  // ==========================================
+  // IDENTIFY BEST MATCH
+  // ==========================================
+
+  if (scoredListings.length > 0) {
+
+    scoredListings[0].isBestMatch = true;
+
+  }
+
+
+  // ==========================================
   // RENDER RESULTS
-  // ========================================
+  // ==========================================
 
   res.render("listings/recommend", {
 

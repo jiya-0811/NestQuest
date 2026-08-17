@@ -1,5 +1,5 @@
+
 <% layout('layouts/boilerplate') %>
-<!-- <%- include('../includes/flash') %> -->
 
 <%
   const f = filters || {};
@@ -8,14 +8,27 @@
 
 <div class="container mt-5">
 
+  <!-- ========================================= -->
   <!-- HEADER -->
+  <!-- ========================================= -->
+
   <div class="text-center mb-5">
-    <h2 class="fw-bold">🤖 Smart Rental Recommendation</h2>
-    <p class="text-muted">Find best stays based on your needs</p>
+
+    <h2 class="fw-bold">
+      🤖 Smart Rental Recommendation
+    </h2>
+
+    <p class="text-muted">
+      Find the best stays based on your preferences
+    </p>
+
   </div>
 
 
-  <!-- 🔍 SEARCH CARD -->
+  <!-- ========================================= -->
+  <!-- SEARCH CARD -->
+  <!-- ========================================= -->
+
   <div class="card shadow-lg border-0 rounded-3 p-4 mb-5">
 
     <form
@@ -25,6 +38,7 @@
     >
 
       <!-- BUDGET -->
+
       <div class="col-md-3">
 
         <label class="form-label">
@@ -43,6 +57,7 @@
 
 
       <!-- LOCATION -->
+
       <div class="col-md-3">
 
         <label class="form-label">
@@ -61,6 +76,7 @@
 
 
       <!-- TYPE -->
+
       <div class="col-md-2">
 
         <label class="form-label">
@@ -69,7 +85,7 @@
 
         <select
           name="type"
-          class="form-control"
+          class="form-select"
         >
 
           <option value="">
@@ -78,21 +94,21 @@
 
           <option
             value="shared"
-            <%= f.type === 'shared' ? 'selected' : '' %>
+            <%= f.type === "shared" ? "selected" : "" %>
           >
             Shared
           </option>
 
           <option
             value="single"
-            <%= f.type === 'single' ? 'selected' : '' %>
+            <%= f.type === "single" ? "selected" : "" %>
           >
             Single
           </option>
 
           <option
             value="flat"
-            <%= f.type === 'flat' ? 'selected' : '' %>
+            <%= f.type === "flat" ? "selected" : "" %>
           >
             Flat
           </option>
@@ -103,6 +119,7 @@
 
 
       <!-- DISTANCE -->
+
       <div class="col-md-2">
 
         <label class="form-label">
@@ -121,6 +138,7 @@
 
 
       <!-- COLLEGE -->
+
       <div class="col-md-3">
 
         <label class="form-label">
@@ -151,6 +169,7 @@
         <div class="row">
 
           <!-- WIFI -->
+
           <div class="col-md-3">
 
             <div class="form-check">
@@ -177,6 +196,7 @@
 
 
           <!-- FOOD -->
+
           <div class="col-md-3">
 
             <div class="form-check">
@@ -203,6 +223,7 @@
 
 
           <!-- PARKING -->
+
           <div class="col-md-3">
 
             <div class="form-check">
@@ -229,6 +250,7 @@
 
 
           <!-- LAUNDRY -->
+
           <div class="col-md-3">
 
             <div class="form-check">
@@ -258,14 +280,15 @@
       </div>
 
 
-      <!-- BUTTON -->
+      <!-- SEARCH BUTTON -->
+
       <div class="col-md-12">
 
         <button
           class="btn btn-dark w-100"
           type="submit"
         >
-          🔍 Search
+          🤖 Find My Best Match
         </button>
 
       </div>
@@ -276,14 +299,33 @@
 
 
   <!-- ========================================= -->
-  <!-- RESULTS -->
+  <!-- RESULTS HEADER -->
   <!-- ========================================= -->
 
   <% if(listings && listings.length > 0){ %>
 
-    <h5 class="mb-4">
-      ✨ Recommended Listings
-    </h5>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+      <div>
+
+        <h5 class="fw-bold mb-1">
+          ✨ Recommended Listings
+        </h5>
+
+        <p class="text-muted mb-0">
+          Ranked according to your preferences
+        </p>
+
+      </div>
+
+      <span class="badge bg-dark">
+
+        <%= listings.length %>
+        match<%= listings.length !== 1 ? "es" : "" %>
+
+      </span>
+
+    </div>
 
   <% } else { %>
 
@@ -294,13 +336,17 @@
       </h5>
 
       <p class="text-muted">
-        Try adjusting filters
+        Try adjusting your preferences
       </p>
 
     </div>
 
   <% } %>
 
+
+  <!-- ========================================= -->
+  <!-- LISTINGS -->
+  <!-- ========================================= -->
 
   <div class="row">
 
@@ -310,50 +356,152 @@
 
         <div class="col-md-4 mb-4">
 
-          <div class="card shadow-sm h-100">
+          <div class="card shadow-sm h-100 border-0">
 
 
             <!-- IMAGE -->
+
             <img
               src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' %>"
               class="card-img-top"
               style="height:200px; object-fit:cover;"
+              alt="<%= listing.title %>"
             >
 
 
             <div class="card-body d-flex flex-column">
 
 
+              <!-- BEST MATCH -->
+
+              <% if(listing.isBestMatch){ %>
+
+                <div class="mb-2">
+
+                  <span class="badge bg-warning text-dark">
+                    🏆 Best Match
+                  </span>
+
+                </div>
+
+              <% } %>
+
+
               <!-- TITLE -->
+
               <h5 class="fw-bold">
                 <%= listing.title %>
               </h5>
 
 
               <!-- LOCATION -->
+
               <p class="text-muted mb-1">
-                📍 <%= listing.location || 'Unknown' %>
+                📍 <%= listing.location || "Unknown" %>
               </p>
 
 
               <!-- PRICE -->
-              <p class="mb-1">
-                💰 ₹ <%= listing.price || 'N/A' %>
+
+              <p class="mb-1 fw-semibold">
+                💰 ₹ <%= listing.price || "N/A" %>
               </p>
 
 
               <!-- DISTANCE -->
+
               <p class="text-muted mb-2">
-                🎓 <%= listing.distance || '?' %> km
-                from <%= listing.college || 'College' %>
+
+                🎓 <%= listing.distance || "?" %> km
+                from <%= listing.college || "College" %>
+
               </p>
 
 
-              <!-- ================================= -->
-              <!-- AMENITIES -->
-              <!-- ================================= -->
+              <!-- ========================================= -->
+              <!-- MATCH SCORE -->
+              <!-- ========================================= -->
 
-              <% if(listing.amenities && listing.amenities.length > 0){ %>
+              <% if(listing.matchPercentage !== undefined){ %>
+
+                <div class="mb-3">
+
+                  <div class="d-flex justify-content-between">
+
+                    <small class="fw-semibold">
+                      ⭐ Match Score
+                    </small>
+
+                    <small class="fw-bold">
+                      <%= listing.matchPercentage %>%
+                    </small>
+
+                  </div>
+
+
+                  <!-- Progress Bar -->
+
+                  <div
+                    class="progress mt-1"
+                    style="height:8px;"
+                  >
+
+                    <div
+                      class="progress-bar bg-success"
+                      role="progressbar"
+                      aria-valuenow="<%= listing.matchPercentage %>"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                      data-match="<%= listing.matchPercentage %>"
+                    ></div>
+
+                  </div>
+
+                </div>
+
+              <% } %>
+
+
+              <!-- ========================================= -->
+              <!-- WHY RECOMMENDED -->
+              <!-- ========================================= -->
+
+              <% if(
+                listing.matchedPreferences &&
+                listing.matchedPreferences.length > 0
+              ){ %>
+
+                <div class="card bg-light border-0 p-2 mb-3">
+
+                  <small class="fw-semibold">
+                    🎯 Why we recommend this:
+                  </small>
+
+                  <div class="mt-1">
+
+                    <% listing.matchedPreferences.forEach(reason => { %>
+
+                      <div class="small text-success">
+                        ✓ <%= reason %>
+                      </div>
+
+                    <% }) %>
+
+                  </div>
+
+                </div>
+
+              <% } %>
+
+
+              <!-- ========================================= -->
+              <!-- AMENITIES -->
+              <!-- ========================================= -->
+
+              <% if(
+                listing.amenities &&
+                listing.amenities.length > 0
+              ){ %>
 
                 <div class="mb-2">
 
@@ -364,6 +512,7 @@
                   <div class="mt-1">
 
                     <% listing.amenities.forEach(amenity => { %>
+
 
                       <% if(amenity === "wifi"){ %>
 
@@ -400,6 +549,7 @@
 
                       <% } %>
 
+
                     <% }) %>
 
                   </div>
@@ -409,15 +559,82 @@
               <% } %>
 
 
-              <!-- ================================= -->
-              <!-- BADGES -->
-              <!-- ================================= -->
+              <!-- ========================================= -->
+              <!-- MATCHED AMENITIES -->
+              <!-- ========================================= -->
 
-              <div class="mb-2">
+              <% if(
+                listing.matchedAmenities &&
+                listing.matchedAmenities.length > 0
+              ){ %>
+
+                <div class="mb-3">
+
+                  <small class="text-success fw-semibold">
+                    🛜 Matches your requested amenities:
+                  </small>
+
+                  <div class="mt-1">
+
+                    <% listing.matchedAmenities.forEach(amenity => { %>
 
 
-                <!-- BUDGET -->
-                <% if(listing.price && listing.price <= 5000){ %>
+                      <% if(amenity === "wifi"){ %>
+
+                        <span class="badge bg-success">
+                          📶 WiFi
+                        </span>
+
+                      <% } %>
+
+
+                      <% if(amenity === "food"){ %>
+
+                        <span class="badge bg-success">
+                          🍱 Food
+                        </span>
+
+                      <% } %>
+
+
+                      <% if(amenity === "parking"){ %>
+
+                        <span class="badge bg-success">
+                          🅿️ Parking
+                        </span>
+
+                      <% } %>
+
+
+                      <% if(amenity === "laundry"){ %>
+
+                        <span class="badge bg-success">
+                          🧺 Laundry
+                        </span>
+
+                      <% } %>
+
+
+                    <% }) %>
+
+                  </div>
+
+                </div>
+
+              <% } %>
+
+
+              <!-- ========================================= -->
+              <!-- NORMAL BADGES -->
+              <!-- ========================================= -->
+
+              <div class="mb-3">
+
+
+                <% if(
+                  listing.price &&
+                  listing.price <= 5000
+                ){ %>
 
                   <span class="badge bg-success">
                     Budget
@@ -426,7 +643,6 @@
                 <% } %>
 
 
-                <!-- NEAR COLLEGE -->
                 <% if(
                   listing.distance !== undefined &&
                   listing.distance <= 2
@@ -439,7 +655,6 @@
                 <% } %>
 
 
-                <!-- TYPE -->
                 <% if(listing.type){ %>
 
                   <span class="badge bg-info text-dark">
@@ -449,88 +664,16 @@
                 <% } %>
 
 
-                <!-- SCORE -->
-                <% if(listing.score !== undefined){ %>
-
-                  <span class="badge bg-dark">
-                    ⭐ Score: <%= listing.score %>
-                  </span>
-
-                <% } %>
-
-
               </div>
 
 
-              <!-- ================================= -->
-              <!-- MATCHED AMENITIES -->
-              <!-- ================================= -->
-
-              <% if(
-                listing.matchedAmenities &&
-                listing.matchedAmenities.length > 0
-              ){ %>
-
-                <div class="mb-3">
-
-                  <small class="text-success fw-semibold">
-                    ✓ Matches your preferences:
-                  </small>
-
-                  <div class="mt-1">
-
-                    <% listing.matchedAmenities.forEach(amenity => { %>
-
-                      <% if(amenity === "wifi"){ %>
-
-                        <span class="badge bg-success">
-                          📶 WiFi
-                        </span>
-
-                      <% } %>
-
-
-                      <% if(amenity === "food"){ %>
-
-                        <span class="badge bg-success">
-                          🍱 Food
-                        </span>
-
-                      <% } %>
-
-
-                      <% if(amenity === "parking"){ %>
-
-                        <span class="badge bg-success">
-                          🅿️ Parking
-                        </span>
-
-                      <% } %>
-
-
-                      <% if(amenity === "laundry"){ %>
-
-                        <span class="badge bg-success">
-                          🧺 Laundry
-                        </span>
-
-                      <% } %>
-
-                    <% }) %>
-
-                  </div>
-
-                </div>
-
-              <% } %>
-
-
               <!-- VIEW DETAILS -->
+
               <a
                 href="/listings/<%= listing._id %>"
                 class="btn btn-dark btn-sm mt-auto w-100"
               >
-                View Details
+                View Details →
               </a>
 
 
@@ -547,3 +690,25 @@
   </div>
 
 </div>
+
+
+<!-- ========================================= -->
+<!-- MATCH SCORE PROGRESS BAR SCRIPT -->
+<!-- ========================================= -->
+
+<script>
+
+  document
+    .querySelectorAll("[data-match]")
+    .forEach(function(bar) {
+
+      const percentage = Number(
+        bar.getAttribute("data-match")
+      );
+
+      bar.style.width = percentage + "%";
+
+    });
+
+</script>
+
