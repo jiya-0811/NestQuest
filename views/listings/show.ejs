@@ -1,85 +1,508 @@
 <% layout('layouts/boilerplate') %>
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
 
-  <h2 class="fw-bold"><%= listing.title %></h2>
+  <!-- ========================================== -->
+  <!-- MAIN LISTING CARD -->
+  <!-- ========================================== -->
 
-  <p class="text-muted">📍 <%= listing.location %></p>
+  <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
 
-  <p>💰 ₹ <%= listing.price %></p>
+    <div class="row g-0">
 
-  <p>🎓 <%= listing.distance %> km from <%= listing.college %></p>
+      <!-- ====================================== -->
+      <!-- IMAGE -->
+      <!-- ====================================== -->
 
-  <!-- ⭐ AVG RATING -->
-  <h5>⭐ Average Rating: <%= avgRating || "No ratings yet" %></h5>
+      <div class="col-md-6">
 
-  <!-- BADGES -->
-  <div class="mb-3">
-    <% if(listing.price <= 5000){ %>
-      <span class="badge bg-success">Budget</span>
-    <% } %>
+        <img
+          src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>"
+          class="img-fluid w-100 h-100"
+          style="min-height: 450px; object-fit: cover;"
+          alt="<%= listing.title %>"
+        >
 
-    <% if(listing.distance <= 2){ %>
-      <span class="badge bg-primary">Near College</span>
-    <% } %>
-  </div>
+      </div>
 
-  <!-- 🔐 OWNER ONLY -->
-  <% if(currUser && listing.owner && currUser._id.equals(listing.owner)){ %>
 
-    <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning">Edit</a>
+      <!-- ====================================== -->
+      <!-- LISTING INFORMATION -->
+      <!-- ====================================== -->
 
-    <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" style="display:inline;">
-      <button class="btn btn-danger">Delete</button>
-    </form>
+      <div class="col-md-6">
 
-  <% } %>
+        <div class="p-4 p-md-5">
 
-  <hr>
+          <!-- TITLE -->
 
-  <!-- ⭐ ADD REVIEW -->
-  <h4>Leave a Review</h4>
+          <h1 class="fw-bold mb-2">
+            <%= listing.title %>
+          </h1>
 
-  <% if(currUser){ %>
-    <form action="/listings/<%= listing._id %>/reviews" method="POST">
 
-      <input type="number" name="review[rating]" min="1" max="5"
-        class="form-control mb-2" placeholder="Rating (1-5)" required>
+          <!-- LOCATION -->
 
-      <textarea name="review[comment]" class="form-control mb-2"
-        placeholder="Write review..." required></textarea>
+          <p class="text-muted fs-5 mb-4">
+            📍 <%= listing.location || "Location not specified" %>
+          </p>
 
-      <button class="btn btn-dark">Submit</button>
-    </form>
 
-  <% } else { %>
-    <p>Please login to review</p>
-  <% } %>
+          <!-- PRICE -->
 
-  <hr>
+          <div class="mb-3">
 
-  <!-- 📝 REVIEWS -->
-  <h4>All Reviews</h4>
+            <span class="fw-bold fs-2">
+              ₹<%= listing.price %>
+            </span>
 
-  <% listing.reviews.forEach(review => { %>
+            <span class="text-muted">
+              / month
+            </span>
 
-    <div class="card p-3 mb-2">
+          </div>
 
-      <b>👤 <%= review.reviewer.username %></b>
 
-      <p>⭐ <%= review.rating %></p>
-      <p><%= review.comment %></p>
+          <!-- COLLEGE + DISTANCE -->
 
-      <% if(currUser){ %>
+          <div class="mb-4">
 
-        <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-          <button class="btn btn-danger btn-sm">Delete Review</button>
-        </form>
+            <p class="mb-2">
+              🎓
+              <strong><%= listing.college || "College not specified" %></strong>
+            </p>
 
-      <% } %>
+            <p class="text-muted">
+              📏 <%= listing.distance || "?" %> km from college
+            </p>
+
+          </div>
+
+
+          <!-- ================================== -->
+          <!-- BADGES -->
+          <!-- ================================== -->
+
+          <div class="mb-4">
+
+            <% if(listing.price && listing.price <= 5000){ %>
+
+              <span class="badge bg-success me-1">
+                💰 Budget Friendly
+              </span>
+
+            <% } %>
+
+
+            <% if(
+              listing.distance !== undefined &&
+              listing.distance <= 2
+            ){ %>
+
+              <span class="badge bg-primary me-1">
+                📍 Near College
+              </span>
+
+            <% } %>
+
+
+            <% if(listing.type){ %>
+
+              <span class="badge bg-info text-dark me-1">
+                🏠 <%= listing.type %>
+              </span>
+
+            <% } %>
+
+          </div>
+
+
+          <hr>
+
+
+          <!-- ================================== -->
+          <!-- DESCRIPTION -->
+          <!-- ================================== -->
+
+          <h5 class="fw-bold mb-2">
+            About this rental
+          </h5>
+
+          <p class="text-muted">
+            <%= listing.description || "No description available." %>
+          </p>
+
+
+          <!-- ================================== -->
+          <!-- AMENITIES -->
+          <!-- ================================== -->
+
+          <% if(listing.amenities && listing.amenities.length > 0){ %>
+
+            <div class="mt-4">
+
+              <h5 class="fw-bold mb-3">
+                ✨ Amenities
+              </h5>
+
+              <div class="d-flex flex-wrap gap-2">
+
+                <% listing.amenities.forEach(amenity => { %>
+
+
+                  <% if(amenity === "wifi"){ %>
+
+                    <span class="badge bg-light text-dark border p-2">
+                      📶 WiFi
+                    </span>
+
+                  <% } %>
+
+
+                  <% if(amenity === "food"){ %>
+
+                    <span class="badge bg-light text-dark border p-2">
+                      🍱 Food
+                    </span>
+
+                  <% } %>
+
+
+                  <% if(amenity === "parking"){ %>
+
+                    <span class="badge bg-light text-dark border p-2">
+                      🅿️ Parking
+                    </span>
+
+                  <% } %>
+
+
+                  <% if(amenity === "laundry"){ %>
+
+                    <span class="badge bg-light text-dark border p-2">
+                      🧺 Laundry
+                    </span>
+
+                  <% } %>
+
+
+                <% }) %>
+
+              </div>
+
+            </div>
+
+          <% } %>
+
+
+          <!-- ================================== -->
+          <!-- RATING -->
+          <!-- ================================== -->
+
+          <div class="mt-4">
+
+            <h5 class="fw-bold">
+              ⭐ Rating
+            </h5>
+
+            <% if(avgRating && avgRating > 0){ %>
+
+              <p class="mb-0">
+
+                <span class="fs-4 fw-bold">
+                  <%= avgRating %>
+                </span>
+
+                <span class="text-warning fs-4">
+                  ★
+                </span>
+
+                <span class="text-muted">
+                  / 5
+                </span>
+
+              </p>
+
+            <% } else { %>
+
+              <p class="text-muted">
+                No ratings yet
+              </p>
+
+            <% } %>
+
+          </div>
+
+
+          <!-- ================================== -->
+          <!-- OWNER ACTIONS -->
+          <!-- ================================== -->
+
+          <% if(
+            currUser &&
+            listing.owner &&
+            currUser._id.equals(listing.owner)
+          ){ %>
+
+            <div class="mt-4 pt-3 border-top">
+
+              <p class="text-muted mb-2">
+                Owner Controls
+              </p>
+
+
+              <a
+                href="/listings/<%= listing._id %>/edit"
+                class="btn btn-warning me-2"
+              >
+                ✏️ Edit
+              </a>
+
+
+              <form
+                action="/listings/<%= listing._id %>?_method=DELETE"
+                method="POST"
+                style="display:inline;"
+              >
+
+                <button class="btn btn-danger">
+                  🗑️ Delete
+                </button>
+
+              </form>
+
+            </div>
+
+          <% } %>
+
+
+        </div>
+
+      </div>
 
     </div>
 
-  <% }) %>
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- REVIEWS SECTION -->
+  <!-- ========================================== -->
+
+  <div class="row mt-5">
+
+
+    <!-- ====================================== -->
+    <!-- ADD REVIEW -->
+    <!-- ====================================== -->
+
+    <div class="col-md-5 mb-4">
+
+      <div class="card shadow-sm border-0 rounded-4 p-4">
+
+        <h4 class="fw-bold mb-3">
+          ⭐ Leave a Review
+        </h4>
+
+
+        <% if(currUser){ %>
+
+          <form
+            action="/listings/<%= listing._id %>/reviews"
+            method="POST"
+          >
+
+            <!-- RATING -->
+
+            <label class="form-label fw-semibold">
+              Rating
+            </label>
+
+            <select
+              name="review[rating]"
+              class="form-select mb-3"
+              required
+            >
+
+              <option value="">
+                Select rating
+              </option>
+
+              <option value="5">
+                ⭐⭐⭐⭐⭐ Excellent
+              </option>
+
+              <option value="4">
+                ⭐⭐⭐⭐ Very Good
+              </option>
+
+              <option value="3">
+                ⭐⭐⭐ Good
+              </option>
+
+              <option value="2">
+                ⭐⭐ Average
+              </option>
+
+              <option value="1">
+                ⭐ Poor
+              </option>
+
+            </select>
+
+
+            <!-- COMMENT -->
+
+            <label class="form-label fw-semibold">
+              Your Review
+            </label>
+
+            <textarea
+              name="review[comment]"
+              class="form-control mb-3"
+              rows="4"
+              placeholder="Share your experience..."
+              required
+            ></textarea>
+
+
+            <button
+              class="btn btn-dark w-100"
+              type="submit"
+            >
+              Submit Review ⭐
+            </button>
+
+          </form>
+
+
+        <% } else { %>
+
+          <div class="text-center py-3">
+
+            <p class="text-muted">
+              Please login to leave a review.
+            </p>
+
+            <a
+              href="/login"
+              class="btn btn-dark"
+            >
+              Login
+            </a>
+
+          </div>
+
+        <% } %>
+
+      </div>
+
+    </div>
+
+
+    <!-- ====================================== -->
+    <!-- ALL REVIEWS -->
+    <!-- ====================================== -->
+
+    <div class="col-md-7">
+
+      <div class="card shadow-sm border-0 rounded-4 p-4">
+
+        <h4 class="fw-bold mb-4">
+          📝 Reviews
+        </h4>
+
+
+        <% if(listing.reviews && listing.reviews.length > 0){ %>
+
+
+          <% listing.reviews.forEach(review => { %>
+
+            <div class="border-bottom pb-3 mb-3">
+
+
+              <!-- REVIEWER -->
+
+              <div class="d-flex justify-content-between">
+
+                <div>
+
+                  <strong>
+                    👤 <%= review.reviewer.username %>
+                  </strong>
+
+                  <div class="text-warning mt-1">
+
+                    <% for(let i = 1; i <= 5; i++){ %>
+
+                      <% if(i <= review.rating){ %>
+                        ★
+                      <% } else { %>
+                        ☆
+                      <% } %>
+
+                    <% } %>
+
+                  </div>
+
+                </div>
+
+
+                <!-- DELETE REVIEW -->
+
+                <% if(
+                  currUser &&
+                  review.reviewer &&
+                  currUser._id.equals(review.reviewer._id)
+                ){ %>
+
+                  <form
+                    action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                    method="POST"
+                  >
+
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                    >
+                      Delete
+                    </button>
+
+                  </form>
+
+                <% } %>
+
+              </div>
+
+
+              <!-- COMMENT -->
+
+              <p class="text-muted mt-2 mb-0">
+                <%= review.comment %>
+              </p>
+
+
+            </div>
+
+          <% }) %>
+
+
+        <% } else { %>
+
+          <div class="text-center py-4">
+
+            <p class="text-muted mb-0">
+              No reviews yet. Be the first one! 🌟
+            </p>
+
+          </div>
+
+        <% } %>
+
+
+      </div>
+
+    </div>
+
+  </div>
 
 </div>
