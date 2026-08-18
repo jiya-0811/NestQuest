@@ -1,79 +1,480 @@
-<% layout('layouts/boilerplate') %>
+
+<%- layout('layouts/boilerplate') %>
 
 <%
   const f = filters || {};
 %>
 
-<div class="container mt-4">
+<style>
 
-  <!-- ========================================== -->
-  <!-- HEADER -->
-  <!-- ========================================== -->
+  /* ==========================================
+     PAGE
+  ========================================== */
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-
-    <div>
-      <h2 class="fw-bold">🏠 Available Rentals</h2>
-      <p class="text-muted mb-0">
-        Find the right stay for your college life
-      </p>
-    </div>
-
-    <div>
-
-      <% if(!currUser){ %>
-
-        <a href="/login" class="btn btn-outline-primary me-2">
-          Login
-        </a>
-
-        <a href="/signup" class="btn btn-primary me-2">
-          Sign Up
-        </a>
-
-      <% } %>
+  .explore-page {
+    padding-bottom: 60px;
+  }
 
 
-      <!-- 🤖 AI SEARCH -->
+  /* ==========================================
+     HERO
+  ========================================== */
 
-      <a
-        href="/listings/recommend/search"
-        class="btn btn-dark me-2"
-      >
-        🤖 Smart Recommendation
-      </a>
+  .explore-hero {
+    background: linear-gradient(
+      135deg,
+      #fff5f6,
+      #ffffff
+    );
+    border-radius: 24px;
+    padding: 42px 35px;
+    margin-bottom: 28px;
+    border: 1px solid #f1f1f1;
+  }
+
+  .hero-title {
+    font-size: 2.1rem;
+    font-weight: 750;
+    color: #222;
+    margin-bottom: 8px;
+  }
+
+  .hero-subtitle {
+    color: #717171;
+    margin-bottom: 0;
+    font-size: 1rem;
+  }
 
 
-      <% if(currUser){ %>
+  /* ==========================================
+     HERO BUTTONS
+  ========================================== */
 
-        <a
-          href="/listings/new"
-          class="btn btn-primary"
-        >
-          ➕ Add Listing
-        </a>
+  .smart-btn {
+    background: #222;
+    color: #fff;
+    border-radius: 12px;
+    padding: 11px 18px;
+    font-weight: 600;
+    border: none;
+    transition: 0.2s;
+  }
 
-      <% } %>
+  .smart-btn:hover {
+    background: #ff385c;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .add-btn {
+    background: #ff385c;
+    color: #fff;
+    border-radius: 12px;
+    padding: 11px 18px;
+    font-weight: 600;
+    border: none;
+    transition: 0.2s;
+  }
+
+  .add-btn:hover {
+    background: #e03150;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+
+  /* ==========================================
+     SEARCH CARD
+  ========================================== */
+
+  .search-card {
+    background: #fff;
+    border: 1px solid #eeeeee;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.05);
+  }
+
+  .search-title {
+    font-weight: 700;
+    color: #222;
+  }
+
+  .search-subtitle {
+    color: #717171;
+    font-size: 0.9rem;
+  }
+
+  .search-card .form-label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .search-card .form-control,
+  .search-card .form-select {
+    height: 45px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+
+  .search-card .form-control:focus,
+  .search-card .form-select:focus {
+    border-color: #ff385c;
+    box-shadow: 0 0 0 3px rgba(255,56,92,0.1);
+  }
+
+  .search-main-btn {
+    background: #ff385c;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .search-main-btn:hover {
+    background: #e03150;
+    color: white;
+  }
+
+
+  /* ==========================================
+     RESULTS HEADER
+  ========================================== */
+
+  .results-heading {
+    font-weight: 700;
+    color: #222;
+  }
+
+  .result-badge {
+    background: #222;
+    color: white;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+
+
+  /* ==========================================
+     LISTING CARD
+  ========================================== */
+
+  .listing-card {
+    border: 1px solid #eeeeee;
+    border-radius: 17px;
+    overflow: hidden;
+    background: white;
+    transition: 0.25s ease;
+    height: 100%;
+  }
+
+  .listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 35px rgba(0,0,0,0.10);
+  }
+
+
+  /* ==========================================
+     IMAGE
+  ========================================== */
+
+  .listing-image-wrapper {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+  }
+
+  .listing-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.35s ease;
+  }
+
+  .listing-card:hover .listing-image {
+    transform: scale(1.04);
+  }
+
+
+  /* ==========================================
+     IMAGE BADGE
+  ========================================== */
+
+  .image-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(255,255,255,0.95);
+    color: #222;
+    border-radius: 20px;
+    padding: 6px 11px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+
+  /* ==========================================
+     FAVORITE UI
+  ========================================== */
+
+  .favorite-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 17px;
+    transition: 0.2s;
+  }
+
+  .favorite-btn:hover {
+    color: #ff385c;
+    transform: scale(1.08);
+  }
+
+
+  /* ==========================================
+     CARD BODY
+  ========================================== */
+
+  .listing-body {
+    padding: 18px;
+  }
+
+  .listing-title {
+    font-weight: 700;
+    color: #222;
+    font-size: 1.05rem;
+    margin-bottom: 7px;
+  }
+
+  .listing-location {
+    color: #717171;
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+  }
+
+  .listing-price {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #222;
+  }
+
+  .listing-price span {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #717171;
+  }
+
+  .listing-college {
+    color: #717171;
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+
+
+  /* ==========================================
+     BADGES
+  ========================================== */
+
+  .custom-badge {
+    border-radius: 20px;
+    padding: 6px 9px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .type-badge {
+    background: #eef7ff;
+    color: #1769aa;
+  }
+
+  .near-badge {
+    background: #edf8f0;
+    color: #218838;
+  }
+
+  .budget-badge {
+    background: #fff7df;
+    color: #946c00;
+  }
+
+
+  /* ==========================================
+     VIEW BUTTON
+  ========================================== */
+
+  .view-btn {
+    background: #222;
+    border: none;
+    border-radius: 9px;
+    color: white;
+    font-weight: 600;
+    padding: 9px 12px;
+    transition: 0.2s;
+  }
+
+  .view-btn:hover {
+    background: #ff385c;
+    color: white;
+  }
+
+
+  /* ==========================================
+     EMPTY STATE
+  ========================================== */
+
+  .empty-state {
+    background: #fff;
+    border: 1px solid #eeeeee;
+    border-radius: 18px;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+  }
+
+
+  /* ==========================================
+     RESPONSIVE
+  ========================================== */
+
+  @media (max-width: 768px) {
+
+    .explore-hero {
+      padding: 30px 22px;
+    }
+
+    .hero-title {
+      font-size: 1.7rem;
+    }
+
+    .hero-actions {
+      margin-top: 22px;
+    }
+
+    .listing-image-wrapper {
+      height: 210px;
+    }
+
+  }
+
+</style>
+
+
+<div class="container explore-page mt-4">
+
+
+  <!-- ==========================================
+       HERO
+  ========================================== -->
+
+  <div class="explore-hero">
+
+    <div class="row align-items-center">
+
+      <div class="col-lg-7">
+
+        <p class="text-muted mb-2">
+          🏠 Find your next stay
+        </p>
+
+        <h1 class="hero-title">
+          Find a place that feels like home.
+        </h1>
+
+        <p class="hero-subtitle">
+          Explore student-friendly rooms, flats and shared stays
+          near your college.
+        </p>
+
+      </div>
+
+
+      <div class="col-lg-5">
+
+        <div class="hero-actions d-flex justify-content-lg-end gap-2 flex-wrap">
+
+          <!-- SMART RECOMMENDATION -->
+
+          <a
+            href="/listings/recommend/search"
+            class="btn smart-btn"
+          >
+            🤖 Smart Recommendation
+          </a>
+
+
+          <!-- ADD LISTING -->
+
+          <% if(currUser){ %>
+
+            <a
+              href="/listings/new"
+              class="btn add-btn"
+            >
+              ➕ Add Listing
+            </a>
+
+          <% } %>
+
+
+          <!-- LOGIN / SIGNUP -->
+
+          <% if(!currUser){ %>
+
+            <a
+              href="/login"
+              class="btn btn-outline-dark"
+            >
+              Login
+            </a>
+
+            <a
+              href="/signup"
+              class="btn add-btn"
+            >
+              Sign Up
+            </a>
+
+          <% } %>
+
+        </div>
+
+      </div>
 
     </div>
 
   </div>
 
 
-  <!-- ========================================== -->
-  <!-- BASIC SEARCH -->
-  <!-- ========================================== -->
+  <!-- ==========================================
+       SEARCH
+  ========================================== -->
 
-  <div class="card shadow-sm border-0 rounded-3 p-4 mb-5">
+  <div class="search-card mb-5">
 
-    <h5 class="fw-bold mb-1">
-      🔍 Search Rentals
-    </h5>
+    <div class="mb-4">
 
-    <p class="text-muted mb-4">
-      Quickly find listings using basic filters.
-      For personalized recommendations, use Smart Recommendation.
-    </p>
+      <h5 class="search-title mb-1">
+        🔍 Search Rentals
+      </h5>
+
+      <p class="search-subtitle mb-0">
+        Quickly filter rentals by location, budget and type.
+      </p>
+
+    </div>
 
 
     <form
@@ -82,9 +483,10 @@
       class="row g-3"
     >
 
+
       <!-- SEARCH -->
 
-      <div class="col-md-4">
+      <div class="col-lg-4 col-md-6">
 
         <label class="form-label">
           Search
@@ -95,7 +497,7 @@
           name="search"
           class="form-control"
           placeholder="Title, location or college"
-          value="<%= f.search %>"
+          value="<%= f.search || '' %>"
         >
 
       </div>
@@ -103,10 +505,10 @@
 
       <!-- BUDGET -->
 
-      <div class="col-md-3">
+      <div class="col-lg-3 col-md-6">
 
         <label class="form-label">
-          Max Budget (₹)
+          Max Budget
         </label>
 
         <input
@@ -115,7 +517,7 @@
           class="form-control"
           placeholder="e.g. 6000"
           min="1"
-          value="<%= f.budget %>"
+          value="<%= f.budget || '' %>"
         >
 
       </div>
@@ -123,7 +525,7 @@
 
       <!-- TYPE -->
 
-      <div class="col-md-2">
+      <div class="col-lg-2 col-md-6">
 
         <label class="form-label">
           Type
@@ -155,7 +557,7 @@
           <option
             value="flat"
             <%= f.type === "flat" ? "selected" : "" %>
-          >
+            >
             Flat
           </option>
 
@@ -166,7 +568,7 @@
 
       <!-- SORT -->
 
-      <div class="col-md-3">
+      <div class="col-lg-3 col-md-6">
 
         <label class="form-label">
           Sort By
@@ -213,7 +615,7 @@
 
         <button
           type="submit"
-          class="btn btn-primary flex-grow-1"
+          class="btn search-main-btn flex-grow-1"
         >
           🔍 Search Rentals
         </button>
@@ -222,7 +624,7 @@
           href="/listings"
           class="btn btn-outline-secondary"
         >
-          🔄 Clear
+          Clear
         </a>
 
       </div>
@@ -232,47 +634,55 @@
   </div>
 
 
-  <!-- ========================================== -->
-  <!-- RESULT COUNT -->
-  <!-- ========================================== -->
+  <!-- ==========================================
+       RESULTS HEADER
+  ========================================== -->
 
   <div class="d-flex justify-content-between align-items-center mb-3">
 
-    <h5 class="fw-bold mb-0">
-      🏠 Available Rentals
+    <h5 class="results-heading mb-0">
+      Available Rentals
     </h5>
 
-    <span class="badge bg-dark">
+    <span class="result-badge">
+
       <%= allListings.length %>
+
       result<%= allListings.length !== 1 ? "s" : "" %>
+
     </span>
 
   </div>
 
 
-  <!-- ========================================== -->
-  <!-- LISTINGS -->
-  <!-- ========================================== -->
+  <!-- ==========================================
+       LISTINGS
+  ========================================== -->
 
-  <div class="row">
+  <div class="row g-4">
+
 
     <% if(allListings.length === 0){ %>
 
       <div class="col-12">
 
-        <div class="text-center py-5">
+        <div class="empty-state text-center">
 
-          <h4>
-            No listings found 😢
+          <div class="empty-icon">
+            🏠
+          </div>
+
+          <h4 class="fw-bold">
+            No listings found
           </h4>
 
           <p class="text-muted">
-            Try changing your search filters.
+            Try changing your search filters or explore all rentals.
           </p>
 
           <a
             href="/listings"
-            class="btn btn-dark"
+            class="btn smart-btn"
           >
             View All Rentals
           </a>
@@ -286,92 +696,152 @@
 
     <% allListings.forEach(listing => { %>
 
-      <div class="col-md-4 mb-4">
 
-        <div class="card shadow-sm h-100 border-0">
-
-          <!-- IMAGE -->
-
-          <img
-            src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' %>"
-            class="card-img-top"
-            style="height:200px; object-fit:cover;"
-            alt="<%= listing.title %>"
-          >
+      <div class="col-xl-4 col-md-6">
 
 
-          <div class="card-body d-flex flex-column">
+        <div class="listing-card">
+
+
+          <!-- ==================================
+               IMAGE
+          ================================== -->
+
+          <div class="listing-image-wrapper">
+
+            <img
+              src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb' %>"
+              class="listing-image"
+              alt="<%= listing.title %>"
+            >
+
+
+            <!-- TYPE -->
+
+            <% if(listing.type){ %>
+
+              <span class="image-badge">
+                <%= listing.type %>
+              </span>
+
+            <% } %>
+
+
+            <!-- FAVORITE VISUAL -->
+
+            <% if(currUser){ %>
+
+              <button
+                type="button"
+                class="favorite-btn"
+                title="Save listing"
+                onclick="this.style.color='#ff385c'"
+              >
+                ♡
+              </button>
+
+            <% } %>
+
+          </div>
+
+
+          <!-- ==================================
+               BODY
+          ================================== -->
+
+          <div class="listing-body d-flex flex-column">
+
 
             <!-- TITLE -->
 
-            <h5 class="card-title fw-bold">
+            <h5 class="listing-title">
               <%= listing.title %>
             </h5>
 
 
             <!-- LOCATION -->
 
-            <p class="text-muted mb-1">
-              📍 <%= listing.location %>
+            <p class="listing-location">
+              📍 <%= listing.location || "Location not specified" %>
             </p>
 
 
             <!-- PRICE -->
 
-            <p class="mb-1 fw-semibold">
-              💰 ₹ <%= listing.price %>
-            </p>
+            <div class="listing-price mb-2">
+
+              ₹<%= listing.price %>
+
+              <span>
+                / month
+              </span>
+
+            </div>
 
 
             <!-- COLLEGE -->
 
-            <p class="text-muted mb-2">
-              🎓 <%= listing.distance %> km from
-              <b><%= listing.college %></b>
+            <p class="listing-college mb-3">
+
+              🎓 <%= listing.distance || "?" %> km from
+
+              <strong>
+                <%= listing.college || "college" %>
+              </strong>
+
             </p>
 
 
             <!-- BADGES -->
 
-            <div class="mb-3">
+            <div class="d-flex flex-wrap gap-1 mb-3">
+
 
               <% if(listing.type){ %>
 
-                <span class="badge bg-info text-dark">
-                  <%= listing.type %>
+                <span class="custom-badge type-badge">
+                  🏠 <%= listing.type %>
                 </span>
 
               <% } %>
 
 
-              <% if(listing.distance <= 2){ %>
+              <% if(
+                listing.distance !== undefined &&
+                listing.distance <= 2
+              ){ %>
 
-                <span class="badge bg-success">
-                  Near College
+                <span class="custom-badge near-badge">
+                  📍 Near College
                 </span>
 
               <% } %>
 
 
-              <% if(listing.price <= 5000){ %>
+              <% if(
+                listing.price !== undefined &&
+                listing.price <= 5000
+              ){ %>
 
-                <span class="badge bg-warning text-dark">
-                  Budget
+                <span class="custom-badge budget-badge">
+                  💰 Budget
                 </span>
 
               <% } %>
+
 
             </div>
 
 
-            <!-- VIEW -->
+            <!-- VIEW BUTTON -->
 
             <a
               href="/listings/<%= listing._id %>"
-              class="btn btn-primary btn-sm mt-auto w-100"
+              class="btn view-btn w-100 mt-auto"
             >
               View Details →
             </a>
+
 
           </div>
 
@@ -379,8 +849,10 @@
 
       </div>
 
+
     <% }) %>
 
   </div>
 
 </div>
+

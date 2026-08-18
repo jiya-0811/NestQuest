@@ -1,0 +1,200 @@
+
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-5 mb-5">
+
+  <!-- ========================================== -->
+  <!-- HEADER -->
+  <!-- ========================================== -->
+
+  <div class="mb-4">
+
+    <h2 class="fw-bold">
+      ❤️ My Favorites
+    </h2>
+
+    <p class="text-muted">
+      Your saved rental properties
+    </p>
+
+  </div>
+
+
+  <!-- ========================================== -->
+  <!-- NO FAVORITES -->
+  <!-- ========================================== -->
+
+  <% if(!favorites || favorites.length === 0){ %>
+
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
+
+      <div style="font-size: 55px;">
+        🤍
+      </div>
+
+      <h4 class="fw-bold mt-3">
+        No favorites yet
+      </h4>
+
+      <p class="text-muted">
+        Save rental properties you like and find them here later.
+      </p>
+
+      <a
+        href="/listings"
+        class="btn btn-primary mt-2"
+      >
+        🔍 Explore Listings
+      </a>
+
+    </div>
+
+
+  <% } else { %>
+
+
+    <!-- ========================================== -->
+    <!-- FAVORITES COUNT -->
+    <!-- ========================================== -->
+
+    <div class="mb-4">
+
+      <span class="badge bg-danger fs-6 px-3 py-2">
+        ❤️ <%= favorites.length %>
+        <%= favorites.length === 1 ? "Saved Listing" : "Saved Listings" %>
+      </span>
+
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- FAVORITES GRID -->
+    <!-- ========================================== -->
+
+    <div class="row">
+
+      <% favorites.forEach(listing => { %>
+
+        <% if(listing){ %>
+
+          <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+
+
+              <!-- IMAGE -->
+
+              <img
+                src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85' %>"
+                class="card-img-top"
+                style="height:220px; object-fit:cover;"
+                alt="<%= listing.title %>"
+              >
+
+
+              <!-- CARD BODY -->
+
+              <div class="card-body d-flex flex-column">
+
+                <h5 class="fw-bold">
+                  <%= listing.title %>
+                </h5>
+
+
+                <p class="text-muted mb-2">
+                  📍 <%= listing.location %>
+                </p>
+
+
+                <p class="mb-2">
+
+                  <strong>
+                    ₹<%= listing.price %>
+                  </strong>
+
+                  <span class="text-muted">
+                    / month
+                  </span>
+
+                </p>
+
+
+                <p class="text-muted mb-2">
+                  🎓 <%= listing.college %>
+                </p>
+
+
+                <!-- BADGES -->
+
+                <div class="mb-3">
+
+                  <% if(listing.type){ %>
+
+                    <span class="badge bg-info text-dark me-1">
+                      🏠 <%= listing.type %>
+                    </span>
+
+                  <% } %>
+
+
+                  <% if(
+                    listing.distance !== undefined &&
+                    listing.distance <= 2
+                  ){ %>
+
+                    <span class="badge bg-success">
+                      📍 Near College
+                    </span>
+
+                  <% } %>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="mt-auto d-flex gap-2">
+
+                  <a
+                    href="/listings/<%= listing._id %>"
+                    class="btn btn-primary flex-grow-1"
+                  >
+                    View
+                  </a>
+
+
+                  <form
+                    action="/listings/<%= listing._id %>/favorite?_method=DELETE"
+                    method="POST"
+                  >
+
+                    <button
+                      type="submit"
+                      class="btn btn-outline-danger"
+                      title="Remove from favorites"
+                    >
+                      ❤️
+                    </button>
+
+                  </form>
+
+                </div>
+
+
+              </div>
+
+            </div>
+
+          </div>
+
+        <% } %>
+
+      <% }) %>
+
+    </div>
+
+
+  <% } %>
+
+</div>
+

@@ -1,38 +1,391 @@
+
 <%- layout("/layouts/boilerplate") %>
 
-<div class="row mt-3">
-  <h1 class="col-6 offset-3">Login</h1>
+<style>
+  .login-page {
+    min-height: 78vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 15px;
+  }
 
-  <div class="col-6 offset-3">
-    <form action="/login" method="POST" class="needs-validation" novalidate>
+  .login-wrapper {
+    width: 100%;
+    max-width: 430px;
+  }
 
-      <!-- Username -->
-      <div class="mb-3">
-        <label for="username" class="form-label">Username</label>
-        <input 
-          type="text" 
-          name="username" 
-          id="username" 
-          class="form-control" 
-          required
-        >
+  .login-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
+    padding: 38px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .login-icon {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #fff0f2;
+    color: #ff385c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 27px;
+  }
+
+  .login-title {
+    font-weight: 700;
+    color: #222222;
+    margin-bottom: 7px;
+  }
+
+  .login-subtitle {
+    color: #717171;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 8px;
+  }
+
+  .input-group-custom {
+    position: relative;
+  }
+
+  .input-group-custom i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    z-index: 2;
+  }
+
+  .custom-input {
+    height: 48px;
+    border: 1px solid #dddddd;
+    border-radius: 10px !important;
+    padding-left: 43px;
+    padding-right: 45px;
+    transition: 0.2s;
+  }
+
+  .custom-input:focus {
+    border-color: #ff385c;
+    box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.12);
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #777;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .password-toggle:hover {
+    color: #ff385c;
+  }
+
+  .login-btn {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    background: #ff385c;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: 0.2s;
+  }
+
+  .login-btn:hover {
+    background: #e03150;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .signup-text {
+    text-align: center;
+    margin-top: 24px;
+    color: #717171;
+    font-size: 0.95rem;
+  }
+
+  .signup-link {
+    color: #ff385c;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .signup-link:hover {
+    text-decoration: underline;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 25px 0;
+    color: #999;
+    font-size: 0.8rem;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e5e5;
+  }
+</style>
+
+
+<div class="login-page">
+
+  <div class="login-wrapper">
+
+    <div class="login-card">
+
+      <!-- ====================================== -->
+      <!-- ICON -->
+      <!-- ====================================== -->
+
+      <div class="login-icon">
+        <i class="fa-solid fa-house"></i>
       </div>
 
-      <!-- Password -->
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input 
-          type="password" 
-          name="password" 
-          id="password" 
-          class="form-control" 
-          required
-        >
+
+      <!-- ====================================== -->
+      <!-- HEADING -->
+      <!-- ====================================== -->
+
+      <div class="text-center">
+
+        <h2 class="login-title">
+          Welcome Back 👋
+        </h2>
+
+        <p class="login-subtitle">
+          Login to continue your NestQuest journey
+        </p>
+
       </div>
 
-      <!-- Button -->
-      <button class="btn btn-primary">Log In</button>
 
-    </form>
+      <!-- ====================================== -->
+      <!-- LOGIN FORM -->
+      <!-- ====================================== -->
+
+      <form
+        action="/login"
+        method="POST"
+        class="needs-validation"
+        novalidate
+      >
+
+
+        <!-- USERNAME -->
+
+        <div class="mb-4">
+
+          <label
+            for="username"
+            class="form-label"
+          >
+            Username
+          </label>
+
+          <div class="input-group-custom">
+
+            <i class="fa-solid fa-user"></i>
+
+            <input
+              type="text"
+              name="username"
+              id="username"
+              class="form-control custom-input"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            >
+
+          </div>
+
+          <div class="invalid-feedback">
+            Please enter your username.
+          </div>
+
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <div class="mb-4">
+
+          <label
+            for="password"
+            class="form-label"
+          >
+            Password
+          </label>
+
+          <div class="input-group-custom">
+
+            <i class="fa-solid fa-lock"></i>
+
+            <input
+              type="password"
+              name="password"
+              id="password"
+              class="form-control custom-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+
+            <button
+              type="button"
+              class="password-toggle"
+              onclick="togglePassword()"
+              aria-label="Show password"
+            >
+              <i
+                class="fa-solid fa-eye"
+                id="passwordIcon"
+              ></i>
+            </button>
+
+          </div>
+
+          <div class="invalid-feedback">
+            Please enter your password.
+          </div>
+
+        </div>
+
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+          type="submit"
+          class="login-btn"
+        >
+          <i class="fa-solid fa-right-to-bracket me-2"></i>
+          Log In
+        </button>
+
+
+      </form>
+
+
+      <!-- DIVIDER -->
+
+      <div class="divider">
+        OR
+      </div>
+
+
+      <!-- SIGNUP -->
+
+      <div class="signup-text">
+
+        Don't have an account?
+
+        <a
+          href="/signup"
+          class="signup-link"
+        >
+          Create one
+        </a>
+
+      </div>
+
+    </div>
+
   </div>
+
 </div>
+
+
+<script>
+
+  // ==========================================
+  // SHOW / HIDE PASSWORD
+  // ==========================================
+
+  function togglePassword() {
+
+    const passwordInput =
+      document.getElementById("password");
+
+    const passwordIcon =
+      document.getElementById("passwordIcon");
+
+
+    if(passwordInput.type === "password") {
+
+      passwordInput.type = "text";
+
+      passwordIcon.classList.remove("fa-eye");
+
+      passwordIcon.classList.add("fa-eye-slash");
+
+    } else {
+
+      passwordInput.type = "password";
+
+      passwordIcon.classList.remove("fa-eye-slash");
+
+      passwordIcon.classList.add("fa-eye");
+
+    }
+
+  }
+
+
+  // ==========================================
+  // BOOTSTRAP VALIDATION
+  // ==========================================
+
+  (() => {
+
+    const forms =
+      document.querySelectorAll(".needs-validation");
+
+
+    Array.from(forms).forEach(form => {
+
+      form.addEventListener(
+        "submit",
+        event => {
+
+          if(!form.checkValidity()) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+          }
+
+          form.classList.add("was-validated");
+
+        },
+        false
+      );
+
+    });
+
+  })();
+
+</script>
+

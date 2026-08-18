@@ -1,10 +1,8 @@
+
 const Listing = require("../models/listing");
 const wrapAsync = require("../utils/wrapAsync");
 const ExpressError = require("../utils/ExpressError");
 
-// ==========================================
-// SHOW ALL LISTINGS
-// ==========================================
 
 // ==========================================
 // SHOW ALL LISTINGS + BASIC SEARCH
@@ -21,6 +19,7 @@ module.exports.index = wrapAsync(async (req, res) => {
 
   let query = {};
 
+
   // ==========================================
   // SEARCH BY TITLE / LOCATION / COLLEGE
   // ==========================================
@@ -35,6 +34,7 @@ module.exports.index = wrapAsync(async (req, res) => {
 
   }
 
+
   // ==========================================
   // MAX BUDGET
   // ==========================================
@@ -47,6 +47,7 @@ module.exports.index = wrapAsync(async (req, res) => {
 
   }
 
+
   // ==========================================
   // TYPE
   // ==========================================
@@ -56,6 +57,7 @@ module.exports.index = wrapAsync(async (req, res) => {
     query.type = type;
 
   }
+
 
   // ==========================================
   // SORT
@@ -81,6 +83,7 @@ module.exports.index = wrapAsync(async (req, res) => {
 
   }
 
+
   // ==========================================
   // FIND LISTINGS
   // ==========================================
@@ -88,6 +91,7 @@ module.exports.index = wrapAsync(async (req, res) => {
   const allListings = await Listing
     .find(query)
     .sort(sortOption);
+
 
   // ==========================================
   // RENDER
@@ -114,10 +118,12 @@ module.exports.index = wrapAsync(async (req, res) => {
 // ==========================================
 
 module.exports.renderNewForm = (req, res) => {
+
   res.render("listings/new", {
     listing: {},
     errorMessages: []
   });
+
 };
 
 
@@ -129,11 +135,21 @@ module.exports.renderEditForm = wrapAsync(async (req, res) => {
 
   const listing = await Listing.findById(req.params.id);
 
+
   if (!listing) {
-    throw new ExpressError("Listing not found", 404);
+
+    throw new ExpressError(
+      "Listing not found",
+      404
+    );
+
   }
 
-  res.render("listings/edit", { listing });
+
+  res.render("listings/edit", {
+    listing
+  });
+
 });
 
 
@@ -147,15 +163,25 @@ module.exports.createListing = wrapAsync(async (req, res) => {
   console.log("📦 REQUEST BODY:", req.body);
   console.log("🖼️ UPLOADED FILE:", req.file);
 
-  const newListing = new Listing(req.body.listing);
+
+  const newListing =
+    new Listing(req.body.listing);
+
 
   // Add logged-in user as owner
-  newListing.owner = req.user._id;
+
+  newListing.owner =
+    req.user._id;
+
 
   // Default amenities
+
   if (!newListing.amenities) {
+
     newListing.amenities = [];
+
   }
+
 
   // ==========================================
   // CLOUDINARY IMAGE
@@ -163,26 +189,44 @@ module.exports.createListing = wrapAsync(async (req, res) => {
 
   if (req.file) {
 
-    console.log("☁️ CLOUDINARY FILE RECEIVED");
+    console.log(
+      "☁️ CLOUDINARY FILE RECEIVED"
+    );
+
 
     newListing.image = {
+
       url: req.file.path,
+
       filename: req.file.filename
+
     };
 
   } else {
 
-    console.log("⚠️ NO IMAGE RECEIVED");
+    console.log(
+      "⚠️ NO IMAGE RECEIVED"
+    );
 
   }
 
+
   await newListing.save();
 
-  console.log("✅ LISTING SAVED SUCCESSFULLY");
 
-  req.flash("success", "Listing Created!");
+  console.log(
+    "✅ LISTING SAVED SUCCESSFULLY"
+  );
+
+
+  req.flash(
+    "success",
+    "Listing Created!"
+  );
+
 
   res.redirect("/listings");
+
 });
 
 
@@ -192,7 +236,9 @@ module.exports.createListing = wrapAsync(async (req, res) => {
 
 module.exports.showListing = wrapAsync(async (req, res) => {
 
-  const listing = await Listing.findById(req.params.id)
+  const listing =
+  await Listing.findById(req.params.id)
+    .populate("owner")
     .populate({
       path: "reviews",
       populate: {
@@ -200,28 +246,76 @@ module.exports.showListing = wrapAsync(async (req, res) => {
       }
     });
 
+
   if (!listing) {
-    throw new ExpressError("Listing not found", 404);
+
+    throw new ExpressError(
+      "Listing not found",
+      404
+    );
+
   }
 
-  // ⭐ Average Rating
+
+  // ==========================================
+  // ⭐ AVERAGE RATING
+  // ==========================================
+
   let avgRating = 0;
+
 
   if (listing.reviews.length > 0) {
 
     let sum = 0;
 
+
     listing.reviews.forEach((r) => {
+
       sum += r.rating;
+
     });
 
-    avgRating = (sum / listing.reviews.length).toFixed(1);
+
+    avgRating =
+      (sum / listing.reviews.length)
+        .toFixed(1);
+
   }
 
+
+  // ==========================================
+  // ❤️ CHECK IF FAVORITE
+  // ==========================================
+
+  let isFavorite = false;
+
+
+  if (req.user) {
+
+    isFavorite =
+      (req.user.favorites || []).some(
+        (favoriteId) =>
+          favoriteId.toString() ===
+          listing._id.toString()
+      );
+
+  }
+
+
+  // ==========================================
+  // RENDER
+  // ==========================================
+
   res.render("listings/show", {
+
     listing,
-    avgRating
+
+    avgRating,
+
+    isFavorite
+
   });
+
 });
 
 
@@ -231,41 +325,73 @@ module.exports.showListing = wrapAsync(async (req, res) => {
 
 module.exports.updateListing = wrapAsync(async (req, res) => {
 
-  const updatedData = req.body.listing;
+  const updatedData =
+    req.body.listing;
+
 
   // Default amenities
+
   if (!updatedData.amenities) {
+
     updatedData.amenities = [];
+
   }
+
 
   // Find listing
-  const listing = await Listing.findById(req.params.id);
+
+  const listing =
+    await Listing.findById(req.params.id);
+
 
   if (!listing) {
-    throw new ExpressError("Listing not found", 404);
+
+    throw new ExpressError(
+      "Listing not found",
+      404
+    );
+
   }
 
+
   // Update text/form data
-  Object.assign(listing, updatedData);
+
+  Object.assign(
+    listing,
+    updatedData
+  );
+
 
   // ==========================================
-  // UPDATE IMAGE IF NEW IMAGE IS PROVIDED
+  // UPDATE IMAGE
   // ==========================================
 
   if (req.file) {
 
     listing.image = {
+
       url: req.file.path,
+
       filename: req.file.filename
+
     };
 
   }
 
+
   await listing.save();
 
-  req.flash("success", "Listing Updated!");
 
-  res.redirect(`/listings/${req.params.id}`);
+  req.flash(
+    "success",
+    "Listing Updated!"
+  );
+
+
+  res.redirect(
+    `/listings/${req.params.id}`
+  );
+
 });
 
 
@@ -275,21 +401,137 @@ module.exports.updateListing = wrapAsync(async (req, res) => {
 
 module.exports.destroyListing = wrapAsync(async (req, res) => {
 
-  const deletedListing = await Listing.findByIdAndDelete(req.params.id);
+  const deletedListing =
+    await Listing.findByIdAndDelete(
+      req.params.id
+    );
+
 
   if (!deletedListing) {
-    throw new ExpressError("Listing not found", 404);
+
+    throw new ExpressError(
+      "Listing not found",
+      404
+    );
+
   }
 
-  req.flash("success", "Listing Deleted!");
+
+  req.flash(
+    "success",
+    "Listing Deleted!"
+  );
+
 
   res.redirect("/listings");
+
 });
 
 
 // ==========================================
-// SMART RECOMMENDATION
+// ❤️ ADD FAVORITE
 // ==========================================
+
+module.exports.addFavorite = wrapAsync(async (req, res) => {
+
+  const listingId =
+    req.params.id;
+
+
+  // Check listing exists
+
+  const listing =
+    await Listing.findById(listingId);
+
+
+  if (!listing) {
+
+    throw new ExpressError(
+      "Listing not found",
+      404
+    );
+
+  }
+
+
+  // Make sure favorites exists
+
+  if (!req.user.favorites) {
+
+    req.user.favorites = [];
+
+  }
+
+
+  // ==========================================
+  // PREVENT DUPLICATE FAVORITES
+  // ==========================================
+
+  const alreadyFavorite =
+    req.user.favorites.some(
+      (favoriteId) =>
+        favoriteId.toString() ===
+        listingId.toString()
+    );
+
+
+  if (!alreadyFavorite) {
+
+    req.user.favorites.push(
+      listingId
+    );
+
+    await req.user.save();
+
+  }
+
+
+  req.flash(
+    "success",
+    "Listing saved to favorites ❤️"
+  );
+
+
+  res.redirect(
+    `/listings/${listingId}`
+  );
+
+});
+
+
+// ==========================================
+// 💔 REMOVE FAVORITE
+// ==========================================
+
+module.exports.removeFavorite = wrapAsync(async (req, res) => {
+
+  const listingId =
+    req.params.id;
+
+
+  req.user.favorites =
+    (req.user.favorites || []).filter(
+      (favoriteId) =>
+        favoriteId.toString() !==
+        listingId.toString()
+    );
+
+
+  await req.user.save();
+
+
+  req.flash(
+    "success",
+    "Listing removed from favorites"
+  );
+
+
+  res.redirect(
+    `/listings/${listingId}`
+  );
+
+});
+
 
 // ==========================================
 // SMART RECOMMENDATION
@@ -313,6 +555,7 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
 
   let selectedAmenities = [];
 
+
   if (amenities) {
 
     if (Array.isArray(amenities)) {
@@ -335,7 +578,7 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   let query = {};
 
 
-  // Budget filter
+  // Budget
 
   if (budget) {
 
@@ -346,16 +589,17 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   }
 
 
-  // Location filter
+  // Location
 
   if (location) {
 
-    query.location = new RegExp(location, "i");
+    query.location =
+      new RegExp(location, "i");
 
   }
 
 
-  // Type filter
+  // Type
 
   if (type) {
 
@@ -364,16 +608,17 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   }
 
 
-  // College filter
+  // College
 
   if (college) {
 
-    query.college = new RegExp(college, "i");
+    query.college =
+      new RegExp(college, "i");
 
   }
 
 
-  // Distance filter
+  // Distance
 
   if (distance) {
 
@@ -388,7 +633,8 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   // FIND LISTINGS
   // ==========================================
 
-  const listings = await Listing.find(query);
+  const listings =
+    await Listing.find(query);
 
 
   // ==========================================
@@ -396,6 +642,7 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   // ==========================================
 
   let maxScore = 0;
+
 
   if (budget) maxScore += 2;
 
@@ -407,9 +654,12 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
 
   if (distance) maxScore += 2;
 
-  // Each selected amenity can give +2
 
-  maxScore += selectedAmenities.length * 2;
+  // Each amenity = +2
+
+  maxScore +=
+    selectedAmenities.length * 2;
+
 
   // Near college bonus
 
@@ -419,7 +669,9 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   // Prevent division by zero
 
   if (maxScore === 0) {
+
     maxScore = 1;
+
   }
 
 
@@ -427,206 +679,228 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   // SMART SCORING
   // ==========================================
 
-  const scoredListings = listings.map((l) => {
+  const scoredListings =
+    listings.map((l) => {
 
-    let score = 0;
-
-    const listingAmenities = l.amenities || [];
-
-    let matchedPreferences = [];
-
-    let matchedAmenities = [];
+      let score = 0;
 
 
-    // ==========================================
-    // BUDGET MATCH
-    // ==========================================
-
-    if (
-      budget &&
-      l.price <= Number(budget)
-    ) {
-
-      score += 2;
-
-      matchedPreferences.push(
-        `Within your ₹${budget} budget`
-      );
-
-    }
+      const listingAmenities =
+        l.amenities || [];
 
 
-    // ==========================================
-    // LOCATION MATCH
-    // ==========================================
+      let matchedPreferences = [];
 
-    if (
-      location &&
-      l.location?.toLowerCase().includes(
-        location.toLowerCase()
-      )
-    ) {
-
-      score += 2;
-
-      matchedPreferences.push(
-        "Preferred location"
-      );
-
-    }
+      let matchedAmenities = [];
 
 
-    // ==========================================
-    // TYPE MATCH
-    // ==========================================
-
-    if (
-      type &&
-      l.type === type
-    ) {
-
-      score += 2;
-
-      matchedPreferences.push(
-        "Preferred room type"
-      );
-
-    }
-
-
-    // ==========================================
-    // COLLEGE MATCH
-    // ==========================================
-
-    if (
-      college &&
-      l.college?.toLowerCase().includes(
-        college.toLowerCase()
-      )
-    ) {
-
-      score += 2;
-
-      matchedPreferences.push(
-        "Preferred college"
-      );
-
-    }
-
-
-    // ==========================================
-    // DISTANCE MATCH
-    // ==========================================
-
-    if (
-      distance &&
-      l.distance <= Number(distance)
-    ) {
-
-      score += 2;
-
-      matchedPreferences.push(
-        `Within ${distance} km`
-      );
-
-    }
-
-
-    // ==========================================
-    // AMENITIES MATCH
-    // ==========================================
-
-    selectedAmenities.forEach((amenity) => {
+      // ==========================================
+      // BUDGET MATCH
+      // ==========================================
 
       if (
-        listingAmenities.includes(amenity)
+        budget &&
+        l.price <= Number(budget)
       ) {
 
         score += 2;
 
-        matchedAmenities.push(amenity);
+        matchedPreferences.push(
+          `Within your ₹${budget} budget`
+        );
 
       }
 
-    });
+
+      // ==========================================
+      // LOCATION MATCH
+      // ==========================================
+
+      if (
+        location &&
+        l.location?.toLowerCase()
+          .includes(
+            location.toLowerCase()
+          )
+      ) {
+
+        score += 2;
+
+        matchedPreferences.push(
+          "Preferred location"
+        );
+
+      }
 
 
-    // ==========================================
-    // NEAR COLLEGE BONUS
-    // ==========================================
+      // ==========================================
+      // TYPE MATCH
+      // ==========================================
 
-    if (
-      l.distance !== undefined &&
-      l.distance <= 2
-    ) {
+      if (
+        type &&
+        l.type === type
+      ) {
 
-      score += 1;
+        score += 2;
 
-      matchedPreferences.push(
-        "Very close to college"
+        matchedPreferences.push(
+          "Preferred room type"
+        );
+
+      }
+
+
+      // ==========================================
+      // COLLEGE MATCH
+      // ==========================================
+
+      if (
+        college &&
+        l.college?.toLowerCase()
+          .includes(
+            college.toLowerCase()
+          )
+      ) {
+
+        score += 2;
+
+        matchedPreferences.push(
+          "Preferred college"
+        );
+
+      }
+
+
+      // ==========================================
+      // DISTANCE MATCH
+      // ==========================================
+
+      if (
+        distance &&
+        l.distance <= Number(distance)
+      ) {
+
+        score += 2;
+
+        matchedPreferences.push(
+          `Within ${distance} km`
+        );
+
+      }
+
+
+      // ==========================================
+      // AMENITIES MATCH
+      // ==========================================
+
+      selectedAmenities.forEach(
+        (amenity) => {
+
+          if (
+            listingAmenities.includes(
+              amenity
+            )
+          ) {
+
+            score += 2;
+
+            matchedAmenities.push(
+              amenity
+            );
+
+          }
+
+        }
       );
 
-    }
+
+      // ==========================================
+      // NEAR COLLEGE BONUS
+      // ==========================================
+
+      if (
+        l.distance !== undefined &&
+        l.distance <= 2
+      ) {
+
+        score += 1;
+
+        matchedPreferences.push(
+          "Very close to college"
+        );
+
+      }
 
 
-    // ==========================================
-    // MATCH PERCENTAGE
-    // ==========================================
+      // ==========================================
+      // MATCH PERCENTAGE
+      // ==========================================
 
-    const matchPercentage = Math.min(
-      100,
-      Math.round((score / maxScore) * 100)
-    );
+      const matchPercentage =
+        Math.min(
+          100,
+          Math.round(
+            (score / maxScore) * 100
+          )
+        );
 
 
-    // ==========================================
-    // RETURN LISTING
-    // ==========================================
+      // ==========================================
+      // RETURN LISTING
+      // ==========================================
 
-    return {
+      return {
 
-      ...l._doc,
+        ...l._doc,
 
-      score,
+        score,
 
-      matchPercentage,
+        matchPercentage,
 
-      matchedPreferences,
+        matchedPreferences,
 
-      matchedAmenities
+        matchedAmenities
 
-    };
+      };
 
-  });
+    });
 
 
   // ==========================================
   // SORT BEST MATCH FIRST
   // ==========================================
 
-  scoredListings.sort((a, b) => {
+  scoredListings.sort(
+    (a, b) => {
 
-    if (b.score !== a.score) {
+      if (
+        b.score !== a.score
+      ) {
 
-      return b.score - a.score;
+        return b.score - a.score;
+
+      }
+
+
+      // Same score → cheaper first
+
+      return a.price - b.price;
 
     }
-
-    // If score is same,
-    // prefer cheaper listing
-
-    return a.price - b.price;
-
-  });
+  );
 
 
   // ==========================================
   // IDENTIFY BEST MATCH
   // ==========================================
 
-  if (scoredListings.length > 0) {
+  if (
+    scoredListings.length > 0
+  ) {
 
-    scoredListings[0].isBestMatch = true;
+    scoredListings[0]
+      .isBestMatch = true;
 
   }
 
@@ -635,21 +909,51 @@ module.exports.recommendListings = wrapAsync(async (req, res) => {
   // RENDER RESULTS
   // ==========================================
 
-  res.render("listings/recommend", {
+  res.render(
+    "listings/recommend",
+    {
 
-    listings: scoredListings,
+      listings: scoredListings,
 
-    filters: {
+      filters: {
 
-      budget,
-      location,
-      type,
-      college,
-      distance,
-      amenities: selectedAmenities
+        budget,
+
+        location,
+
+        type,
+
+        college,
+
+        distance,
+
+        amenities:
+          selectedAmenities
+
+      }
 
     }
+  );
 
+});
+
+
+// ==========================================
+// ❤️ SHOW MY FAVORITES
+// ==========================================
+
+module.exports.showFavorites = wrapAsync(async (req, res) => {
+
+  const user = await require("../models/user")
+    .findById(req.user._id)
+    .populate("favorites");
+
+  const favorites = user.favorites || [];
+
+  res.render("listings/favorites", {
+    favorites
   });
 
 });
+
+

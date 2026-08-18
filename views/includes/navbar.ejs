@@ -1,3 +1,4 @@
+
 <style>
   .search-btn{
     background-color: #ff385c;
@@ -26,57 +27,189 @@
     font-weight: 500;
     margin-right: 10px;
   }
+
+  .favorite-link {
+    color: #dc3545 !important;
+    font-weight: 600;
+  }
+
+  .favorite-link:hover {
+    color: #b02a37 !important;
+  }
 </style>
 
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
+
   <div class="container">
 
-    <!-- 🔥 BRAND -->
+
+    <!-- ====================================== -->
+    <!-- BRAND -->
+    <!-- ====================================== -->
+
     <a class="navbar-brand fw-bold" href="/listings">
-      <i class="fa-solid fa-house"></i> College Rental
+
+      <i class="fa-solid fa-house"></i>
+      College Rental
+
     </a>
 
+
+    <!-- ====================================== -->
     <!-- MOBILE BUTTON -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <!-- ====================================== -->
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
+
       <span class="navbar-toggler-icon"></span>
+
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
 
+    <div
+      class="collapse navbar-collapse"
+      id="navbarNav"
+    >
+
+
+      <!-- ====================================== -->
       <!-- LEFT -->
+      <!-- ====================================== -->
+
       <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
-        <a class="nav-link" href="/listings/new">➕ Add Listing</a>
+
+        <a
+          class="nav-link"
+          href="/listings"
+        >
+          Explore
+        </a>
+
+
+        <% if(currUser) { %>
+
+          <a
+            class="nav-link"
+            href="/listings/new"
+          >
+            ➕ Add Listing
+          </a>
+
+
+          <!-- ❤️ FAVORITES -->
+
+          <a
+            class="nav-link favorite-link"
+            href="/listings/favorites"
+          >
+            ❤️ Favorites
+          </a>
+
+        <% } %>
+
       </div>
 
-      <!-- 🔍 SEARCH -->
+
+      <!-- ====================================== -->
+      <!-- SEARCH -->
+      <!-- ====================================== -->
+
       <div class="ms-auto me-3">
-        <form class="d-flex" action="/listings/recommend/search" method="GET">
-          <input 
-            class="form-control search-inp me-2" 
+
+        <form
+          class="d-flex"
+          action="/listings/recommend/search"
+          method="GET"
+        >
+
+          <input
+            class="form-control search-inp me-2"
             type="search"
             name="location"
             placeholder="Search city..."
           >
-          <button class="btn search-btn">
+
+          <button
+            class="btn search-btn"
+            type="submit"
+          >
+
             <i class="fa-solid fa-magnifying-glass"></i>
+
           </button>
+
         </form>
+
       </div>
 
+
+      <!-- ====================================== -->
       <!-- RIGHT -->
+      <!-- ====================================== -->
+
       <div class="navbar-nav">
+
         <% if(!currUser) { %>
-          <a class="nav-link" href="/signup">Signup</a>
-          <a class="nav-link" href="/login">Login</a>
+
+
+          <!-- LOGGED OUT -->
+
+          <a
+            class="nav-link"
+            href="/signup"
+          >
+            Signup
+          </a>
+
+
+          <a
+            class="nav-link"
+            href="/login"
+          >
+            Login
+          </a>
+
+
         <% } else { %>
-          <span class="nav-user">👋 <%= currUser.username %></span>
-          <form action="/logout" method="POST" class="d-inline">
-            <button class="btn btn-outline-danger btn-sm">Logout</button>
+
+
+          <!-- LOGGED IN -->
+
+          <span class="nav-user">
+            👋 <%= currUser.username %>
+          </span>
+
+
+          <form
+            action="/logout"
+            method="POST"
+            class="d-inline"
+          >
+
+            <button
+              class="btn btn-outline-danger btn-sm"
+              type="submit"
+            >
+              Logout
+            </button>
+
           </form>
+
+
         <% } %>
+
       </div>
+
 
     </div>
+
   </div>
+
 </nav>
+
